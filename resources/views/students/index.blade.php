@@ -24,16 +24,49 @@
         </div>
         <p class="mt-2 text-xs text-slate-500">Centang siswa di tabel. Jika Fingerprint ID kosong, sistem otomatis membuat nomor user/PIN berikutnya sebelum dikirim ke mesin.</p>
     </form>
-    <div class="mt-6 overflow-x-auto"><table id="studentsTable" class="w-full text-sm"><thead><tr><th><input id="checkAllStudents" type="checkbox" class="h-4 w-4 rounded border-emerald-300"></th><th>NISN</th><th>Nama</th><th>Kelas</th><th>JK</th><th>FP ID</th><th>Status</th><th>Aksi</th></tr></thead></table></div>
+    <div class="mt-6 grid gap-3 md:grid-cols-3">
+        <label class="text-sm font-semibold text-emerald-950">Status Kirim
+            <select id="syncStatusFilter" class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                <option value="">Semua status</option>
+                <option value="unsent">Belum terkirim</option>
+                <option value="sent">Sudah terkirim</option>
+            </select>
+        </label>
+        <label class="text-sm font-semibold text-emerald-950">Kelas
+            <select id="classroomFilter" class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                <option value="">Semua kelas</option>
+                @foreach($classrooms as $classroom)
+                    <option value="{{ $classroom }}">{{ $classroom }}</option>
+                @endforeach
+            </select>
+        </label>
+        <div class="flex items-end">
+            <button type="button" id="resetStudentFilters" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600">Reset Filter</button>
+        </div>
+    </div>
+    <div class="mt-6 overflow-x-auto"><table id="studentsTable" class="w-full text-sm"><thead><tr><th><input id="checkAllStudents" type="checkbox" class="h-4 w-4 rounded border-emerald-300"></th><th>NISN</th><th>Nama</th><th>Kelas</th><th>JK</th><th>FP ID</th><th>Terkirim</th><th>Status</th><th>Aksi</th></tr></thead></table></div>
 </div>
 @endsection
 @push('scripts')
 <script>
-new DataTable('#studentsTable',{processing:true,serverSide:true,ajax:'{{ route('students.data') }}',columns:[
- {data:'select',orderable:false,searchable:false},{data:'nisn'},{data:'name'},{data:'classroom'},{data:'gender'},{data:'fingerprint_id'},{data:'status_badge',orderable:false,searchable:false},{data:'actions',orderable:false,searchable:false}
+const studentsTable = new DataTable('#studentsTable',{processing:true,serverSide:true,ajax:{
+    url: '{{ route('students.data') }}',
+    data: function (data) {
+        data.sync_status = document.getElementById('syncStatusFilter').value;
+        data.classroom = document.getElementById('classroomFilter').value;
+    }
+},columns:[
+ {data:'select',orderable:false,searchable:false},{data:'nisn'},{data:'name'},{data:'classroom'},{data:'gender'},{data:'fingerprint_id'},{data:'sync_status_badge',orderable:false,searchable:false},{data:'status_badge',orderable:false,searchable:false},{data:'actions',orderable:false,searchable:false}
 ]});
 document.getElementById('checkAllStudents').addEventListener('change', function () {
     document.querySelectorAll('.student-check').forEach((checkbox) => checkbox.checked = this.checked);
+});
+document.getElementById('syncStatusFilter').addEventListener('change', () => studentsTable.ajax.reload());
+document.getElementById('classroomFilter').addEventListener('change', () => studentsTable.ajax.reload());
+document.getElementById('resetStudentFilters').addEventListener('click', function () {
+    document.getElementById('syncStatusFilter').value = '';
+    document.getElementById('classroomFilter').value = '';
+    studentsTable.ajax.reload();
 });
 </script>
 @endpush

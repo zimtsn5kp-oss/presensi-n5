@@ -22,16 +22,38 @@ class StudentController extends Controller
     {
         return view('students.index', [
             'machines' => Fingerprint::orderBy('name')->get(),
+            'classrooms' => Student::query()
+                ->whereNotNull('classroom')
+                ->distinct()
+                ->orderBy('classroom')
+                ->pluck('classroom'),
         ]);
     }
 
-    public function data()
+    public function data(Request $request)
     {
-        return DataTables::of(Student::query())
+        $sentSql = "EXISTS (
+            SELECT 1 FROM fingerprint_sync_histories fsh
+            WHERE fsh.action = 'send-student'
+            AND fsh.status = 'success'
+            AND CAST(JSON_UNQUOTE(JSON_EXTRACT(fsh.payload, '$.student_id')) AS UNSIGNED) = students.id
+        )";
+
+        $query = Student::query()
+            ->select('students.*')
+            ->selectRaw("{$sentSql} as sent_to_machine")
+            ->when($request->filled('classroom'), fn ($query) => $query->where('classroom', $request->string('classroom')))
+            ->when($request->sync_status === 'sent', fn ($query) => $query->whereRaw($sentSql))
+            ->when($request->sync_status === 'unsent', fn ($query) => $query->whereRaw("NOT {$sentSql}"));
+
+        return DataTables::of($query)
             ->addColumn('select', fn ($student) => '<input form="syncStudentsForm" type="checkbox" name="student_ids[]" value="'.$student->id.'" class="student-check h-4 w-4 rounded border-emerald-300 text-emerald-700">')
+            ->addColumn('sync_status_badge', fn ($student) => $student->sent_to_machine
+                ? '<span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Terkirim</span>'
+                : '<span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">Belum</span>')
             ->addColumn('status_badge', fn ($student) => view('partials.status', ['active' => $student->is_active])->render())
             ->addColumn('actions', fn ($student) => view('students.partials.actions', compact('student'))->render())
-            ->rawColumns(['select', 'status_badge', 'actions'])
+            ->rawColumns(['select', 'sync_status_badge', 'status_badge', 'actions'])
             ->make();
     }
 
@@ -152,7 +174,11 @@ class StudentController extends Controller
                 'status' => 'success',
                 'processed_rows' => $result['processed'] ?? 1,
                 'message' => $result['message'] ?? 'Data siswa berhasil dikirim ke mesin.',
-                'payload' => $result,
+                'payload' => [
+                    'student_id' => $student->id,
+                    'fingerprint_id' => $student->fingerprint_id,
+                    'result' => $result,
+                ],
             ]);
 
             return ['type' => 'success', 'text' => 'Data siswa tersimpan dan proses kirim ke mesin fingerprint tercatat.'];
