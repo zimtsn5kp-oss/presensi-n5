@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\StudentImportTemplateExport;
 use App\Exports\StudentsExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StudentRequest;
-use App\Models\Fingerprint;
-use App\Models\FingerprintSyncHistory;
+use App\Imports\StudentsImport;
 use App\Models\Student;
-use App\Models\Teacher;
 use App\Services\ActivityLogger;
-use App\Services\FingerprintGateway;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -21,39 +19,20 @@ class StudentController extends Controller
     public function index()
     {
         return view('students.index', [
-            'machines' => Fingerprint::orderBy('name')->get(),
-            'classrooms' => Student::query()
-                ->whereNotNull('classroom')
-                ->distinct()
-                ->orderBy('classroom')
-                ->pluck('classroom'),
+            'classrooms' => $this->classrooms(),
         ]);
     }
 
     public function data(Request $request)
     {
-        $sentSql = "EXISTS (
-            SELECT 1 FROM fingerprint_sync_histories fsh
-            WHERE fsh.action = 'send-student'
-            AND fsh.status = 'success'
-            AND CAST(JSON_UNQUOTE(JSON_EXTRACT(fsh.payload, '$.student_id')) AS UNSIGNED) = students.id
-        )";
-
         $query = Student::query()
             ->select('students.*')
-            ->selectRaw("{$sentSql} as sent_to_machine")
-            ->when($request->filled('classroom'), fn ($query) => $query->where('classroom', $request->string('classroom')))
-            ->when($request->sync_status === 'sent', fn ($query) => $query->whereRaw($sentSql))
-            ->when($request->sync_status === 'unsent', fn ($query) => $query->whereRaw("NOT {$sentSql}"));
+            ->when($request->filled('classroom'), fn ($query) => $query->where('classroom', $request->string('classroom')));
 
         return DataTables::of($query)
-            ->addColumn('select', fn ($student) => '<input form="syncStudentsForm" type="checkbox" name="student_ids[]" value="'.$student->id.'" class="student-check h-4 w-4 rounded border-emerald-300 text-emerald-700">')
-            ->addColumn('sync_status_badge', fn ($student) => $student->sent_to_machine
-                ? '<span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Terkirim</span>'
-                : '<span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">Belum</span>')
             ->addColumn('status_badge', fn ($student) => view('partials.status', ['active' => $student->is_active])->render())
             ->addColumn('actions', fn ($student) => view('students.partials.actions', compact('student'))->render())
-            ->rawColumns(['select', 'sync_status_badge', 'status_badge', 'actions'])
+            ->rawColumns(['status_badge', 'actions'])
             ->make();
     }
 
@@ -61,16 +40,13 @@ class StudentController extends Controller
     {
         return view('students.form', [
             'student' => new Student(),
+            'classrooms' => $this->classrooms(),
         ]);
     }
 
     public function store(StudentRequest $request, ActivityLogger $logger)
     {
         $data = $request->validated();
-
-        if ($request->hasFile('photo')) {
-            $data['photo_path'] = $request->file('photo')->store('students', 'public');
-        }
 
         $student = Student::create($data + ['is_active' => $request->boolean('is_active', true)]);
         $logger->record('student.created', $student);
@@ -82,16 +58,13 @@ class StudentController extends Controller
     {
         return view('students.form', [
             'student' => $student,
+            'classrooms' => $this->classrooms(),
         ]);
     }
 
     public function update(StudentRequest $request, Student $student, ActivityLogger $logger)
     {
         $data = $request->validated();
-
-        if ($request->hasFile('photo')) {
-            $data['photo_path'] = $request->file('photo')->store('students', 'public');
-        }
 
         $student->update($data + ['is_active' => $request->boolean('is_active')]);
         $logger->record('student.updated', $student);
@@ -118,83 +91,30 @@ class StudentController extends Controller
             ->download('data-siswa.pdf');
     }
 
-    public function syncToMachine(Request $request, FingerprintGateway $fingerprintGateway)
+    public function import(Request $request)
     {
         $data = $request->validate([
-            'fingerprint_id' => ['required', 'exists:fingerprints,id'],
-            'student_ids' => ['required', 'array', 'min:1'],
-            'student_ids.*' => ['integer', 'exists:students,id'],
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:4096'],
         ], [
-            'student_ids.required' => 'Pilih minimal satu siswa untuk dikirim ke mesin fingerprint.',
-            'fingerprint_id.required' => 'Pilih mesin fingerprint tujuan.',
+            'file.required' => 'Pilih file Excel yang akan diimport.',
+            'file.mimes' => 'File import harus berformat xlsx, xls, atau csv.',
         ]);
 
-        $students = Student::whereIn('id', $data['student_ids'])->orderBy('name')->get();
-        $sent = 0;
-        $failed = 0;
-        $messages = [];
+        $import = new StudentsImport();
+        Excel::import($import, $data['file']);
 
-        foreach ($students as $student) {
-            if (blank($student->fingerprint_id)) {
-                $student->update(['fingerprint_id' => $this->nextFingerprintId()]);
-            }
-
-            $result = $this->sendStudentToMachine($request, $fingerprintGateway, $student->fresh(), (int) $data['fingerprint_id']);
-            if ($result['type'] === 'success') {
-                $sent++;
-            } else {
-                $failed++;
-                $messages[] = $student->name.': '.$result['text'];
-            }
-        }
-
-        if ($failed > 0) {
-            return back()->with('error', "{$sent} siswa berhasil diproses, {$failed} gagal. ".implode(' ', array_slice($messages, 0, 2)));
-        }
-
-        return back()->with('success', "{$sent} siswa berhasil diproses untuk dikirim ke mesin fingerprint.");
+        return redirect()
+            ->route('students.index')
+            ->with('success', "{$import->created} siswa baru ditambahkan, {$import->updated} siswa diperbarui.");
     }
 
-    private function sendStudentToMachine(Request $request, FingerprintGateway $fingerprintGateway, Student $student, int $machineId): array
+    public function importTemplate()
     {
-        $machine = Fingerprint::findOrFail($machineId);
-        $history = FingerprintSyncHistory::create([
-            'fingerprint_id' => $machine->id,
-            'user_id' => $request->user()->id,
-            'action' => 'send-student',
-            'status' => 'running',
-            'processed_rows' => 0,
-            'payload' => ['student_id' => $student->id, 'fingerprint_id' => $student->fingerprint_id],
-        ]);
-
-        try {
-            $result = $fingerprintGateway->sendStudent($machine, $student);
-            $machine->update(['is_online' => true, 'last_sync_at' => now()]);
-            $history->update([
-                'status' => 'success',
-                'processed_rows' => $result['processed'] ?? 1,
-                'message' => $result['message'] ?? 'Data siswa berhasil dikirim ke mesin.',
-                'payload' => [
-                    'student_id' => $student->id,
-                    'fingerprint_id' => $student->fingerprint_id,
-                    'result' => $result,
-                ],
-            ]);
-
-            return ['type' => 'success', 'text' => 'Data siswa tersimpan dan proses kirim ke mesin fingerprint tercatat.'];
-        } catch (\Throwable $exception) {
-            $machine->update(['is_online' => false]);
-            $history->update(['status' => 'failed', 'message' => $exception->getMessage()]);
-
-            return ['type' => 'error', 'text' => 'Data siswa tersimpan, tetapi gagal menghubungi mesin fingerprint: '.$exception->getMessage()];
-        }
+        return Excel::download(new StudentImportTemplateExport(), 'format-import-siswa.xlsx');
     }
 
-    private function nextFingerprintId(): int
+    private function classrooms(): array
     {
-        $maxStudent = (int) Student::max('fingerprint_id');
-        $maxTeacher = (int) Teacher::max('fingerprint_id');
-
-        return max($maxStudent, $maxTeacher, 1000) + 1;
+        return ['7A', '7B', '7C', '8A', '8B', '8C', '9A', '9B', '9C'];
     }
 }

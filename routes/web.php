@@ -28,7 +28,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('students/data', [StudentController::class, 'data'])->name('students.data');
         Route::get('students/export/excel', [StudentController::class, 'exportExcel'])->name('students.export.excel');
         Route::get('students/export/pdf', [StudentController::class, 'exportPdf'])->name('students.export.pdf');
-        Route::post('students/sync-to-machine', [StudentController::class, 'syncToMachine'])->name('students.sync-to-machine');
+        Route::get('students/import/template', [StudentController::class, 'importTemplate'])->name('students.import.template');
+        Route::post('students/import', [StudentController::class, 'import'])->name('students.import');
         Route::resource('students', StudentController::class)->except('show');
 
         Route::get('teachers/data', [TeacherController::class, 'data'])->name('teachers.data');

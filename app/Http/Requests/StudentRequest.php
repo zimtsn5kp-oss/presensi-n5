@@ -19,10 +19,8 @@ class StudentRequest extends FormRequest
         return [
             'nisn' => ['required', 'string', 'max:30', Rule::unique('students', 'nisn')->ignore($student)],
             'name' => ['required', 'string', 'max:150'],
-            'classroom' => ['required', 'string', 'max:50'],
+            'classroom' => ['required', Rule::in(['7A', '7B', '7C', '8A', '8B', '8C', '9A', '9B', '9C'])],
             'gender' => ['required', 'in:L,P'],
-            'address' => ['nullable', 'string'],
-            'photo' => ['nullable', 'image', 'max:2048'],
             'fingerprint_id' => ['nullable', 'integer', Rule::unique('students', 'fingerprint_id')->ignore($student), Rule::unique('teachers', 'fingerprint_id')],
             'is_active' => ['nullable', 'boolean'],
         ];

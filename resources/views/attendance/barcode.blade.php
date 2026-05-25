@@ -12,7 +12,7 @@
         </div>
 
         <div class="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-slate-950">
-            <video id="cameraPreview" class="aspect-video w-full bg-slate-950 object-cover" muted playsinline></video>
+            <div id="cameraPreview" class="min-h-[360px] w-full bg-slate-950"></div>
         </div>
 
         <div class="mt-4 flex flex-wrap gap-3">
@@ -52,18 +52,17 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
 const form = document.getElementById('barcodeForm');
 const input = document.getElementById('barcodeInput');
 const mode = document.getElementById('attendanceType');
 const result = document.getElementById('scanResult');
 const state = document.getElementById('scannerState');
-const video = document.getElementById('cameraPreview');
-let stream = null;
-let detector = null;
+const cameraPreview = document.getElementById('cameraPreview');
+let html5QrCode = null;
 let lastCode = '';
 let lastScanAt = 0;
-let scanning = false;
 
 function setState(text, tone = 'slate') {
     const tones = {
@@ -125,44 +124,88 @@ form.addEventListener('submit', function (event) {
 });
 
 document.getElementById('startCamera').addEventListener('click', async function () {
-    if (!('BarcodeDetector' in window)) {
-        setState('Browser tidak mendukung', 'red');
-        renderResult({message: 'BarcodeDetector belum tersedia di browser ini. Gunakan Chrome/Edge terbaru atau scanner USB.'}, false);
+    if (!window.Html5Qrcode) {
+        setState('Library scanner belum termuat', 'red');
+        renderResult({message: 'Library scanner webcam belum termuat. Pastikan komputer terhubung internet, lalu refresh halaman. Scanner USB tetap bisa digunakan.'}, false);
         return;
     }
 
-    detector = new BarcodeDetector({formats: ['code_128', 'code_39', 'code_93', 'ean_13', 'ean_8', 'qr_code']});
-    stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'environment'}, audio: false});
-    video.srcObject = stream;
-    await video.play();
-    scanning = true;
-    setState('Webcam aktif', 'emerald');
-    detectLoop();
-});
-
-document.getElementById('stopCamera').addEventListener('click', function () {
-    scanning = false;
-    stream?.getTracks().forEach((track) => track.stop());
-    stream = null;
-    video.srcObject = null;
-    setState('Siap', 'slate');
-});
-
-async function detectLoop() {
-    if (!scanning || !detector) {
+    if (!navigator.mediaDevices?.getUserMedia) {
+        setState('Kamera tidak tersedia', 'red');
+        renderResult({message: 'Browser tidak mengizinkan akses webcam pada halaman ini. Gunakan HTTPS, localhost, atau scanner USB.'}, false);
         return;
     }
 
     try {
-        const codes = await detector.detect(video);
-        if (codes.length > 0) {
-            submitBarcode(codes[0].rawValue);
+        if (html5QrCode) {
+            await stopCamera();
         }
+
+        cameraPreview.innerHTML = '';
+        html5QrCode = new Html5Qrcode('cameraPreview', {verbose: false});
+        await html5QrCode.start(
+            {facingMode: 'environment'},
+            {
+                fps: 10,
+                qrbox: function (viewfinderWidth, viewfinderHeight) {
+                    const size = Math.floor(Math.min(viewfinderWidth, viewfinderHeight) * 0.72);
+
+                    return {width: Math.max(size, 220), height: Math.max(size, 220)};
+                },
+                formatsToSupport: [
+                    Html5QrcodeSupportedFormats.QR_CODE,
+                    Html5QrcodeSupportedFormats.CODE_128,
+                    Html5QrcodeSupportedFormats.CODE_39,
+                    Html5QrcodeSupportedFormats.CODE_93,
+                    Html5QrcodeSupportedFormats.EAN_13,
+                    Html5QrcodeSupportedFormats.EAN_8,
+                    Html5QrcodeSupportedFormats.UPC_A,
+                    Html5QrcodeSupportedFormats.UPC_E,
+                ],
+            },
+            (decodedText) => submitBarcode(decodedText),
+        );
+        setState('Webcam aktif', 'emerald');
     } catch (error) {
-        setState('Kamera error', 'red');
+        setState('Kamera gagal aktif', 'red');
+        renderResult({message: cameraErrorMessage(error)}, false);
+        await stopCamera();
+    }
+});
+
+document.getElementById('stopCamera').addEventListener('click', function () {
+    stopCamera();
+});
+
+async function stopCamera() {
+    if (html5QrCode?.isScanning) {
+        await html5QrCode.stop();
     }
 
-    requestAnimationFrame(detectLoop);
+    html5QrCode?.clear();
+    html5QrCode = null;
+    cameraPreview.innerHTML = '';
+    setState('Siap', 'slate');
+}
+
+function cameraErrorMessage(error) {
+    if (location.protocol !== 'https:' && !['localhost', '127.0.0.1'].includes(location.hostname)) {
+        return 'Webcam hanya bisa aktif di HTTPS atau localhost. Jika aplikasi dibuka dari IP LAN, aktifkan HTTPS di server atau gunakan scanner USB.';
+    }
+
+    if (error?.name === 'NotAllowedError') {
+        return 'Izin kamera ditolak. Klik ikon kamera/gembok di address bar Edge, izinkan Camera, lalu refresh halaman.';
+    }
+
+    if (error?.name === 'NotFoundError') {
+        return 'Webcam tidak ditemukan. Pastikan kamera tersambung dan tidak dimatikan di Windows.';
+    }
+
+    if (error?.name === 'NotReadableError') {
+        return 'Webcam sedang dipakai aplikasi lain. Tutup aplikasi kamera/meeting lalu coba lagi.';
+    }
+
+    return 'Webcam belum bisa aktif. Cek izin kamera Edge/Windows, lalu refresh halaman.';
 }
 </script>
 @endpush
