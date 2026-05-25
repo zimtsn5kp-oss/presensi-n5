@@ -35,6 +35,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('teachers/data', [TeacherController::class, 'data'])->name('teachers.data');
         Route::get('teachers/export/excel', [TeacherController::class, 'exportExcel'])->name('teachers.export.excel');
         Route::get('teachers/export/pdf', [TeacherController::class, 'exportPdf'])->name('teachers.export.pdf');
+        Route::get('teachers/import/template', [TeacherController::class, 'importTemplate'])->name('teachers.import.template');
+        Route::post('teachers/import', [TeacherController::class, 'import'])->name('teachers.import');
         Route::resource('teachers', TeacherController::class)->except('show');
 
         Route::resource('fingerprints', FingerprintController::class)->only(['index', 'store', 'update', 'destroy']);

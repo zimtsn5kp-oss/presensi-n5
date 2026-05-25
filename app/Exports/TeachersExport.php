@@ -10,11 +10,11 @@ class TeachersExport implements FromCollection, WithHeadings
 {
     public function collection()
     {
-        return Teacher::select('nip', 'name', 'subject', 'position', 'fingerprint_id', 'is_active')->orderBy('name')->get();
+        return Teacher::select('nip', 'name', 'subject', 'is_active')->orderBy('name')->get();
     }
 
     public function headings(): array
     {
-        return ['NIP', 'Nama', 'Mapel', 'Jabatan', 'Barcode ID', 'Aktif'];
+        return ['NIP', 'Nama', 'Mapel', 'Aktif'];
     }
 }

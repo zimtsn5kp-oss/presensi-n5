@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\TeacherImportTemplateExport;
 use App\Exports\TeachersExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TeacherRequest;
+use App\Imports\TeachersImport;
 use App\Models\Teacher;
 use App\Services\ActivityLogger;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -69,5 +72,27 @@ class TeacherController extends Controller
     public function exportPdf()
     {
         return Pdf::loadView('exports.teachers', ['teachers' => Teacher::orderBy('name')->get()])->download('data-guru.pdf');
+    }
+
+    public function import(Request $request)
+    {
+        $data = $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,xls,csv', 'max:4096'],
+        ], [
+            'file.required' => 'Pilih file Excel yang akan diimport.',
+            'file.mimes' => 'File import harus berformat xlsx, xls, atau csv.',
+        ]);
+
+        $import = new TeachersImport();
+        Excel::import($import, $data['file']);
+
+        return redirect()
+            ->route('teachers.index')
+            ->with('success', "{$import->created} guru baru ditambahkan, {$import->updated} guru diperbarui.");
+    }
+
+    public function importTemplate()
+    {
+        return Excel::download(new TeacherImportTemplateExport(), 'format-import-guru.xlsx');
     }
 }
