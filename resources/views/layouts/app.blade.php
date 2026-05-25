@@ -28,7 +28,7 @@
             @endif
             <div>
                 <p class="font-bold leading-tight">{{ $schoolSetting?->school_name ?? 'Absensi Madrasah' }}</p>
-                <p class="text-xs text-emerald-100">Fingerprint LAN System</p>
+                <p class="text-xs text-emerald-100">Barcode Attendance System</p>
             </div>
         </div>
         <nav class="space-y-1 px-4 pb-6">
@@ -37,6 +37,7 @@
                     ['Dashboard', 'dashboard', 'M4 13h6V4H4v9Zm10 7h6V4h-6v16ZM4 20h6v-5H4v5Zm10 0h6v-9h-6v9Z'],
                     ['Siswa', 'students.index', 'M12 12c2.2 0 4-1.8 4-4s-1.8-4-4-4-4 1.8-4 4 1.8 4 4 4Zm-7 8c.8-3.1 3.6-5 7-5s6.2 1.9 7 5H5Z'],
                     ['Guru', 'teachers.index', 'M12 3 2 8l10 5 10-5-10-5Zm-6 9v4c2 2 10 2 12 0v-4l-6 3-6-3Z'],
+                    ['Scan Barcode', 'attendance.barcode', 'M4 5h4V3H2v6h2V5Zm12-2v2h4v4h2V3h-6Zm4 16h-4v2h6v-6h-2v4ZM4 15H2v6h6v-2H4v-4Zm3-6h2v2H7V9Zm4 0h6v2h-6V9Zm-4 4h10v2H7v-2Zm0 4h6v2H7v-2Zm8 0h2v2h-2v-2Z'],
                     ['Fingerprint', 'fingerprints.index', 'M12 2a6 6 0 0 0-6 6v4a6 6 0 0 0 12 0V8a6 6 0 0 0-6-6Zm0 3a3 3 0 0 1 3 3v4a3 3 0 0 1-6 0V8a3 3 0 0 1 3-3Z'],
                     ['Manual', 'attendance.manual', 'M5 4h14v2H5V4Zm0 4h14v12H5V8Zm3 3v2h8v-2H8Z'],
                     ['Izin/Sakit', 'attendance.absence', 'M12 2 3 6v6c0 5 4 8 9 10 5-2 9-5 9-10V6l-9-4Zm-1 6h2v4h4v2h-6V8Z'],

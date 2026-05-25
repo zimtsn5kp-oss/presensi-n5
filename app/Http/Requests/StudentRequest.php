@@ -23,7 +23,7 @@ class StudentRequest extends FormRequest
             'gender' => ['required', 'in:L,P'],
             'address' => ['nullable', 'string'],
             'photo' => ['nullable', 'image', 'max:2048'],
-            'fingerprint_id' => ['nullable', 'integer', Rule::unique('students', 'fingerprint_id')->ignore($student)],
+            'fingerprint_id' => ['nullable', 'integer', Rule::unique('students', 'fingerprint_id')->ignore($student), Rule::unique('teachers', 'fingerprint_id')],
             'is_active' => ['nullable', 'boolean'],
         ];
     }

@@ -5,7 +5,7 @@
         <div><h2 class="text-lg font-bold text-emerald-950">Data Guru</h2><p class="text-sm text-slate-500">NIP, mapel, jabatan, nomor fingerprint, dan status aktif.</p></div>
         <div class="flex gap-2"><a href="{{ route('teachers.export.excel') }}" class="rounded-xl border border-emerald-200 px-4 py-2 text-sm font-semibold text-emerald-700">Excel</a><a href="{{ route('teachers.export.pdf') }}" class="rounded-xl border border-amber-200 px-4 py-2 text-sm font-semibold text-amber-700">PDF</a><a href="{{ route('teachers.create') }}" class="rounded-xl bg-emerald-900 px-4 py-2 text-sm font-semibold text-white">Tambah</a></div>
     </div>
-    <div class="mt-6 overflow-x-auto"><table id="teachersTable" class="w-full text-sm"><thead><tr><th>NIP</th><th>Nama</th><th>Mapel</th><th>Jabatan</th><th>FP ID</th><th>Status</th><th>Aksi</th></tr></thead></table></div>
+    <div class="mt-6 overflow-x-auto"><table id="teachersTable" class="w-full text-sm"><thead><tr><th>NIP</th><th>Nama</th><th>Mapel</th><th>Jabatan</th><th>Barcode ID</th><th>Status</th><th>Aksi</th></tr></thead></table></div>
 </div>
 @endsection
 @push('scripts')

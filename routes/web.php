@@ -49,6 +49,8 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::middleware('role:administrator,guru')->group(function () {
+        Route::get('attendance/barcode', [AttendanceController::class, 'barcodeForm'])->name('attendance.barcode');
+        Route::post('attendance/barcode', [AttendanceController::class, 'storeBarcode'])->name('attendance.barcode.store');
         Route::get('attendance/manual', [AttendanceController::class, 'manualForm'])->name('attendance.manual');
         Route::post('attendance/manual', [AttendanceController::class, 'storeManual'])->name('attendance.manual.store');
         Route::get('attendance/absence', [AttendanceController::class, 'absenceForm'])->name('attendance.absence');

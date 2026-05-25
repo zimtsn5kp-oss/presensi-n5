@@ -15,6 +15,6 @@ class TeachersExport implements FromCollection, WithHeadings
 
     public function headings(): array
     {
-        return ['NIP', 'Nama', 'Mapel', 'Jabatan', 'Fingerprint ID', 'Aktif'];
+        return ['NIP', 'Nama', 'Mapel', 'Jabatan', 'Barcode ID', 'Aktif'];
     }
 }
