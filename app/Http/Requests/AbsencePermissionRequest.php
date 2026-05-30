@@ -14,12 +14,10 @@ class AbsencePermissionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'attendable_type' => ['required', 'in:student,teacher'],
-            'attendable_id' => ['required', 'integer'],
+            'attendable_id' => ['required', 'integer', 'exists:students,id'],
             'absence_date' => ['required', 'date'],
-            'type' => ['required', 'in:izin,sakit,alfa,dispensasi'],
+            'type' => ['required', 'in:izin,sakit,alfa'],
             'description' => ['nullable', 'string'],
-            'attachment' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:4096'],
         ];
     }
 }

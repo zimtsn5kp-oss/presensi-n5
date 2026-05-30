@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\AttendanceLog;
 use App\Models\AttendanceSetting;
-use App\Models\Fingerprint;
 use App\Models\Holiday;
 use App\Models\Permission;
 use App\Models\Role;
@@ -25,14 +24,12 @@ class DatabaseSeeder extends Seeder
         collect([
             ['students.manage', 'Kelola siswa', 'master'],
             ['teachers.manage', 'Kelola guru', 'master'],
-            ['fingerprints.manage', 'Kelola fingerprint', 'fingerprint'],
-            ['attendance.manual', 'Input kehadiran manual', 'attendance'],
             ['attendance.absence', 'Input ketidakhadiran', 'attendance'],
             ['reports.view', 'Lihat laporan', 'reports'],
         ])->each(function ($row) use ($admin, $teacherRole) {
             $permission = Permission::firstOrCreate(['name' => $row[0]], ['display_name' => $row[1], 'group' => $row[2]]);
             $admin->permissions()->syncWithoutDetaching($permission->id);
-            if (in_array($row[0], ['attendance.manual', 'attendance.absence', 'reports.view'], true)) {
+            if (in_array($row[0], ['attendance.absence', 'reports.view'], true)) {
                 $teacherRole->permissions()->syncWithoutDetaching($permission->id);
             }
         });
@@ -61,18 +58,16 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $students = collect([
-            ['nisn' => '0061234501', 'name' => 'Ahmad Fauzan', 'classroom' => 'VII A', 'gender' => 'L', 'fingerprint_id' => 1001],
-            ['nisn' => '0061234502', 'name' => 'Aisyah Zahra', 'classroom' => 'VII A', 'gender' => 'P', 'fingerprint_id' => 1002],
-            ['nisn' => '0061234503', 'name' => 'Muhammad Nabil', 'classroom' => 'VIII B', 'gender' => 'L', 'fingerprint_id' => 1003],
-            ['nisn' => '0061234504', 'name' => 'Siti Maryam', 'classroom' => 'IX A', 'gender' => 'P', 'fingerprint_id' => 1004],
-        ])->map(fn ($data) => Student::firstOrCreate(['nisn' => $data['nisn']], $data + ['address' => 'Komplek madrasah']));
+            ['nisn' => '0061234501', 'name' => 'Ahmad Fauzan', 'classroom' => '7A', 'gender' => 'L'],
+            ['nisn' => '0061234502', 'name' => 'Aisyah Zahra', 'classroom' => '7A', 'gender' => 'P'],
+            ['nisn' => '0061234503', 'name' => 'Muhammad Nabil', 'classroom' => '8B', 'gender' => 'L'],
+            ['nisn' => '0061234504', 'name' => 'Siti Maryam', 'classroom' => '9A', 'gender' => 'P'],
+        ])->map(fn ($data) => Student::firstOrCreate(['nisn' => $data['nisn']], $data));
 
-        $teachers = collect([
-            ['nip' => '198812122010011001', 'name' => 'Ust. Hasan Basri', 'subject' => 'Fiqih', 'position' => 'Wali Kelas', 'fingerprint_id' => 2001],
-            ['nip' => '199105052014012002', 'name' => 'Usth. Nur Aulia', 'subject' => 'Bahasa Arab', 'position' => 'Guru Mapel', 'fingerprint_id' => 2002],
+        collect([
+            ['nip' => '198812122010011001', 'name' => 'Ust. Hasan Basri', 'subject' => 'Fiqih'],
+            ['nip' => '199105052014012002', 'name' => 'Usth. Nur Aulia', 'subject' => 'Bahasa Arab'],
         ])->map(fn ($data) => Teacher::firstOrCreate(['nip' => $data['nip']], $data));
-
-        Fingerprint::firstOrCreate(['ip_address' => '192.168.1.201'], ['name' => 'Mesin Gerbang Utama', 'port' => 4370]);
 
         foreach (range(1, 5) as $day) {
             AttendanceSetting::firstOrCreate(['day_of_week' => $day, 'name' => 'Reguler'], [
@@ -96,7 +91,6 @@ class DatabaseSeeder extends Seeder
                 'attendable_id' => $student->id,
                 'attendance_date' => today()->toDateString(),
             ], [
-                'machine_user_id' => $student->fingerprint_id,
                 'check_in_at' => $index === 2 ? '07:18:00' : '06:48:00',
                 'status' => $index === 2 ? 'terlambat' : 'hadir',
                 'late_minutes' => $index === 2 ? 18 : 0,
@@ -104,17 +98,5 @@ class DatabaseSeeder extends Seeder
             ]);
         });
 
-        $teachers->each(function (Teacher $teacher) {
-            AttendanceLog::updateOrCreate([
-                'attendable_type' => Teacher::class,
-                'attendable_id' => $teacher->id,
-                'attendance_date' => today()->toDateString(),
-            ], [
-                'machine_user_id' => $teacher->fingerprint_id,
-                'check_in_at' => '06:35:00',
-                'status' => 'hadir',
-                'source' => 'seeder',
-            ]);
-        });
     }
 }

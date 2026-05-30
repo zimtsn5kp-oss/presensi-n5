@@ -6,7 +6,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <h2 class="text-lg font-bold text-emerald-950">Scanner Absensi</h2>
-                <p class="text-sm text-slate-500">Gunakan webcam atau scanner USB. Kode dapat berupa Barcode ID/PIN, NISN, atau NIP.</p>
+                <p class="text-sm text-slate-500">Gunakan webcam atau scanner USB. Barcode siswa menggunakan NISN.</p>
             </div>
             <span id="scannerState" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">Siap</span>
         </div>
@@ -45,7 +45,7 @@
         </div>
         <div class="mt-5 rounded-3xl border border-amber-100 bg-amber-50 p-5 text-sm text-amber-800">
             <p class="font-bold">Format barcode yang didukung</p>
-            <p class="mt-2">Contoh: <strong>1001</strong>, <strong>0061234501</strong>, <strong>S:1001</strong>, atau <strong>T:2001</strong>.</p>
+            <p class="mt-2">Contoh: <strong>0061234501</strong> atau <strong>S:0061234501</strong>.</p>
         </div>
     </aside>
 </div>

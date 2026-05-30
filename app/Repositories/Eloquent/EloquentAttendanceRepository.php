@@ -4,7 +4,6 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\AttendanceLog;
 use App\Models\Student;
-use App\Models\Teacher;
 use App\Repositories\Contracts\AttendanceRepository;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Carbon;
@@ -16,7 +15,6 @@ class EloquentAttendanceRepository implements AttendanceRepository
     {
         $today = today();
         $activeStudents = Student::where('is_active', true)->count();
-        $activeTeachers = Teacher::where('is_active', true)->count();
 
         $studentPresent = AttendanceLog::whereDate('attendance_date', $today)
             ->where('attendable_type', Student::class)
@@ -25,10 +23,9 @@ class EloquentAttendanceRepository implements AttendanceRepository
 
         return [
             'student_present' => $studentPresent,
-            'late' => AttendanceLog::whereDate('attendance_date', $today)->where('status', 'terlambat')->count(),
-            'absent' => AttendanceLog::whereDate('attendance_date', $today)->whereIn('status', ['izin', 'sakit', 'alfa'])->count(),
-            'teacher_present' => AttendanceLog::whereDate('attendance_date', $today)->where('attendable_type', Teacher::class)->whereIn('status', ['hadir', 'terlambat'])->count(),
-            'not_checked_in' => max(($activeStudents + $activeTeachers) - AttendanceLog::whereDate('attendance_date', $today)->distinct('attendable_id')->count('attendable_id'), 0),
+            'late' => AttendanceLog::whereDate('attendance_date', $today)->where('attendable_type', Student::class)->where('status', 'terlambat')->count(),
+            'absent' => AttendanceLog::whereDate('attendance_date', $today)->where('attendable_type', Student::class)->whereIn('status', ['izin', 'sakit', 'alfa'])->count(),
+            'not_checked_in' => max($activeStudents - AttendanceLog::whereDate('attendance_date', $today)->where('attendable_type', Student::class)->distinct('attendable_id')->count('attendable_id'), 0),
         ];
     }
 
@@ -43,7 +40,7 @@ class EloquentAttendanceRepository implements AttendanceRepository
         $present = AttendanceLog::whereMonth('attendance_date', now()->month)
             ->whereYear('attendance_date', now()->year)
             ->where('attendable_type', Student::class)
-            ->whereIn('status', ['hadir', 'terlambat', 'dispensasi'])
+            ->whereIn('status', ['hadir', 'terlambat'])
             ->count();
 
         return round(($present / max($students * $workdays, 1)) * 100, 1);
@@ -55,13 +52,14 @@ class EloquentAttendanceRepository implements AttendanceRepository
 
         return [
             'labels' => $period->map(fn ($date) => $date->isoFormat('DD MMM'))->values(),
-            'series' => $period->map(fn ($date) => AttendanceLog::whereDate('attendance_date', $date)->whereIn('status', ['hadir', 'terlambat'])->count())->values(),
+            'series' => $period->map(fn ($date) => AttendanceLog::whereDate('attendance_date', $date)->where('attendable_type', Student::class)->whereIn('status', ['hadir', 'terlambat'])->count())->values(),
         ];
     }
 
     public function weeklyLateChart(): array
     {
         $rows = AttendanceLog::select(DB::raw('DATE(attendance_date) as day'), DB::raw('count(*) as total'))
+            ->where('attendable_type', Student::class)
             ->where('status', 'terlambat')
             ->whereBetween('attendance_date', [now()->subDays(6)->toDateString(), Carbon::now()->toDateString()])
             ->groupBy('day')

@@ -4,7 +4,7 @@
     <form class="grid gap-3 md:grid-cols-5">
         <input type="date" name="date_from" value="{{ $filters['date_from'] ?? '' }}" class="rounded-2xl border px-4 py-3">
         <input type="date" name="date_to" value="{{ $filters['date_to'] ?? '' }}" class="rounded-2xl border px-4 py-3">
-        <select name="status" class="rounded-2xl border px-4 py-3"><option value="">Semua Status</option>@foreach(['hadir','terlambat','izin','sakit','alfa','dispensasi'] as $status)<option @selected(($filters['status'] ?? '')===$status)>{{ $status }}</option>@endforeach</select>
+        <select name="status" class="rounded-2xl border px-4 py-3"><option value="">Semua Status</option>@foreach(['hadir','terlambat','izin','sakit','alfa'] as $status)<option @selected(($filters['status'] ?? '')===$status)>{{ $status }}</option>@endforeach</select>
         <button class="rounded-2xl bg-emerald-900 px-4 py-3 font-semibold text-white">Filter</button>
         <div class="flex gap-2"><a href="{{ route('reports.excel', request()->query()) }}" class="rounded-2xl border px-4 py-3 font-semibold text-emerald-700">Excel</a><a href="{{ route('reports.pdf', request()->query()) }}" class="rounded-2xl border px-4 py-3 font-semibold text-amber-700">PDF</a></div>
     </form>

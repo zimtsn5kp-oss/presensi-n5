@@ -4,15 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AbsencePermissionRequest;
-use App\Http\Requests\ManualAttendanceRequest;
 use App\Models\AbsencePermission;
 use App\Models\AttendanceLog;
 use App\Models\AttendanceSetting;
-use App\Models\ManualAttendance;
 use App\Models\Student;
-use App\Models\Teacher;
 use Carbon\CarbonInterface;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 class AttendanceController extends Controller
@@ -34,7 +30,7 @@ class AttendanceController extends Controller
         $owner = $this->resolveBarcodeOwner($data['barcode']);
 
         if (! $owner) {
-            return $this->barcodeResponse($request, false, 'Barcode tidak ditemukan pada data siswa atau guru.');
+            return $this->barcodeResponse($request, false, 'Barcode tidak ditemukan pada data siswa.');
         }
 
         if (! $owner->is_active) {
@@ -60,7 +56,6 @@ class AttendanceController extends Controller
         if ($action === 'check_in') {
             $lateMinutes = $this->lateMinutes($now);
             $log->fill([
-                'machine_user_id' => $owner->fingerprint_id,
                 'check_in_at' => $time,
                 'status' => $lateMinutes > 0 ? 'terlambat' : 'hadir',
                 'late_minutes' => $lateMinutes,
@@ -80,7 +75,6 @@ class AttendanceController extends Controller
             }
 
             $log->fill([
-                'machine_user_id' => $owner->fingerprint_id,
                 'check_out_at' => $time,
                 'source' => 'barcode',
                 'raw_payload' => array_merge($log->raw_payload ?? [], [
@@ -98,48 +92,14 @@ class AttendanceController extends Controller
         return $this->barcodeResponse($request, true, 'Absen '.$label.' tersimpan untuk '.$owner->name.'.', $log);
     }
 
-    public function manualForm()
-    {
-        return view('attendance.manual', ['students' => Student::where('is_active', true)->orderBy('name')->get(), 'teachers' => Teacher::where('is_active', true)->orderBy('name')->get()]);
-    }
-
-    public function storeManual(ManualAttendanceRequest $request)
-    {
-        $owner = $this->resolveAttendable($request->attendable_type, (int) $request->attendable_id);
-        $path = $request->file('letter')?->store('manual-attendances', 'public');
-
-        ManualAttendance::create([
-            'attendable_type' => $owner::class,
-            'attendable_id' => $owner->id,
-            'created_by' => $request->user()->id,
-            'attendance_date' => $request->attendance_date,
-            'task_type' => $request->task_type,
-            'description' => $request->description,
-            'letter_path' => $path,
-        ]);
-
-        AttendanceLog::updateOrCreate([
-            'attendable_type' => $owner::class,
-            'attendable_id' => $owner->id,
-            'attendance_date' => $request->attendance_date,
-        ], [
-            'status' => 'dispensasi',
-            'source' => 'manual',
-            'note' => $request->task_type.' - '.$request->description,
-        ]);
-
-        return back()->with('success', 'Kehadiran manual tersimpan.');
-    }
-
     public function absenceForm()
     {
-        return view('attendance.absence', ['students' => Student::where('is_active', true)->orderBy('name')->get(), 'teachers' => Teacher::where('is_active', true)->orderBy('name')->get()]);
+        return view('attendance.absence', ['students' => Student::where('is_active', true)->orderBy('name')->get()]);
     }
 
     public function storeAbsence(AbsencePermissionRequest $request)
     {
-        $owner = $this->resolveAttendable($request->attendable_type, (int) $request->attendable_id);
-        $path = $request->file('attachment')?->store('absence-permissions', 'public');
+        $owner = Student::findOrFail((int) $request->attendable_id);
 
         AbsencePermission::create([
             'attendable_type' => $owner::class,
@@ -148,7 +108,6 @@ class AttendanceController extends Controller
             'absence_date' => $request->absence_date,
             'type' => $request->type,
             'description' => $request->description,
-            'attachment_path' => $path,
         ]);
 
         AttendanceLog::updateOrCreate([
@@ -164,42 +123,17 @@ class AttendanceController extends Controller
         return back()->with('success', 'Data ketidakhadiran tersimpan.');
     }
 
-    private function resolveAttendable(string $type, int $id): Model
-    {
-        return $type === 'student' ? Student::findOrFail($id) : Teacher::findOrFail($id);
-    }
-
-    private function resolveBarcodeOwner(string $barcode): ?Model
+    private function resolveBarcodeOwner(string $barcode): ?Student
     {
         $code = trim($barcode);
-        $lowerCode = strtolower($code);
         $typedCode = preg_replace('/^(student|siswa|s):/i', '', $code);
 
-        if ($typedCode !== $code || str_starts_with($lowerCode, 'student:') || str_starts_with($lowerCode, 'siswa:') || str_starts_with($lowerCode, 's:')) {
-            return $this->findStudentByCode($typedCode);
-        }
-
-        $typedCode = preg_replace('/^(teacher|guru|t):/i', '', $code);
-
-        if ($typedCode !== $code || str_starts_with($lowerCode, 'teacher:') || str_starts_with($lowerCode, 'guru:') || str_starts_with($lowerCode, 't:')) {
-            return $this->findTeacherByCode($typedCode);
-        }
-
-        return $this->findStudentByCode($code) ?? $this->findTeacherByCode($code);
+        return $this->findStudentByCode($typedCode);
     }
 
     private function findStudentByCode(string $code): ?Student
     {
-        return Student::where('nisn', $code)
-            ->when(is_numeric($code), fn ($query) => $query->orWhere('fingerprint_id', (int) $code))
-            ->first();
-    }
-
-    private function findTeacherByCode(string $code): ?Teacher
-    {
-        return Teacher::where('nip', $code)
-            ->when(is_numeric($code), fn ($query) => $query->orWhere('fingerprint_id', (int) $code))
-            ->first();
+        return Student::where('nisn', $code)->first();
     }
 
     private function resolveBarcodeAction(AttendanceLog $log, string $mode): ?string

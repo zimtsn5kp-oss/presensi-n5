@@ -3,7 +3,6 @@
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\FingerprintController;
 use App\Http\Controllers\Admin\HolidayController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SettingController;
@@ -39,9 +38,6 @@ Route::middleware(['auth'])->group(function () {
         Route::post('teachers/import', [TeacherController::class, 'import'])->name('teachers.import');
         Route::resource('teachers', TeacherController::class)->except('show');
 
-        Route::resource('fingerprints', FingerprintController::class)->only(['index', 'store', 'update', 'destroy']);
-        Route::post('fingerprints/{fingerprint}/action', [FingerprintController::class, 'action'])->name('fingerprints.action');
-
         Route::resource('holidays', HolidayController::class)->only(['index', 'store', 'destroy']);
         Route::get('backups', [BackupController::class, 'index'])->name('backups.index');
         Route::post('backups', [BackupController::class, 'store'])->name('backups.store');
@@ -54,8 +50,6 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('role:administrator,guru')->group(function () {
         Route::get('attendance/barcode', [AttendanceController::class, 'barcodeForm'])->name('attendance.barcode');
         Route::post('attendance/barcode', [AttendanceController::class, 'storeBarcode'])->name('attendance.barcode.store');
-        Route::get('attendance/manual', [AttendanceController::class, 'manualForm'])->name('attendance.manual');
-        Route::post('attendance/manual', [AttendanceController::class, 'storeManual'])->name('attendance.manual.store');
         Route::get('attendance/absence', [AttendanceController::class, 'absenceForm'])->name('attendance.absence');
         Route::post('attendance/absence', [AttendanceController::class, 'storeAbsence'])->name('attendance.absence.store');
 

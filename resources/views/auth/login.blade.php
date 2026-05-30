@@ -10,8 +10,8 @@
     <section class="hidden items-end bg-[radial-gradient(circle_at_20%_20%,#facc15_0,#facc1530_20%,transparent_40%),linear-gradient(135deg,#064e3b,#022c22)] p-12 text-white lg:flex">
         <div>
             <div class="mb-8 grid h-16 w-16 place-items-center rounded-3xl bg-amber-300 text-2xl font-black text-emerald-950">ن</div>
-            <h1 class="max-w-xl text-5xl font-black leading-tight">Absensi fingerprint madrasah yang rapi, cepat, dan aman.</h1>
-            <p class="mt-5 max-w-lg text-emerald-100">Pantau kehadiran siswa dan guru, sinkronisasi mesin LAN, dan ekspor laporan harian atau bulanan dari satu dashboard.</p>
+            <h1 class="max-w-xl text-5xl font-black leading-tight">Absensi barcode siswa yang rapi, cepat, dan aman.</h1>
+            <p class="mt-5 max-w-lg text-emerald-100">Pantau kehadiran siswa dan ekspor laporan harian atau bulanan dari satu dashboard.</p>
         </div>
     </section>
     <section class="flex items-center justify-center p-6">

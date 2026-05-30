@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\AttendanceLog;
+use App\Models\Student;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
@@ -16,14 +17,15 @@ class AttendanceReportExport implements FromCollection, WithHeadings
     {
         return AttendanceLog::query()
             ->with('attendable')
+            ->where('attendable_type', Student::class)
             ->when($this->filters['date_from'] ?? null, fn ($q, $date) => $q->whereDate('attendance_date', '>=', $date))
             ->when($this->filters['date_to'] ?? null, fn ($q, $date) => $q->whereDate('attendance_date', '<=', $date))
+            ->when($this->filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
             ->latest('attendance_date')
             ->get()
             ->map(fn ($log) => [
                 'date' => $log->attendance_date?->format('Y-m-d'),
                 'name' => $log->attendable?->name ?? 'Tidak dikenali',
-                'type' => class_basename($log->attendable_type),
                 'check_in' => $log->check_in_at,
                 'check_out' => $log->check_out_at,
                 'status' => ucfirst($log->status),
@@ -34,6 +36,6 @@ class AttendanceReportExport implements FromCollection, WithHeadings
 
     public function headings(): array
     {
-        return ['Tanggal', 'Nama', 'Tipe', 'Masuk', 'Pulang', 'Status', 'Terlambat Menit', 'Sumber'];
+        return ['Tanggal', 'Nama Siswa', 'Masuk', 'Pulang', 'Status', 'Terlambat Menit', 'Sumber'];
     }
 }

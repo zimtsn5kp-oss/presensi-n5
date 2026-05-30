@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\AttendanceLog;
-use App\Models\FingerprintSyncHistory;
+use App\Models\Student;
 use App\Repositories\Contracts\AttendanceRepository;
 
 class DashboardController extends Controller
@@ -18,11 +18,11 @@ class DashboardController extends Controller
             'lateChart' => $attendance->weeklyLateChart(),
             'monthlyPercentage' => $attendance->monthlyPercentage(),
             'absenceStats' => AttendanceLog::selectRaw('status, count(*) as total')
+                ->where('attendable_type', Student::class)
                 ->whereMonth('attendance_date', now()->month)
                 ->whereIn('status', ['izin', 'sakit', 'alfa'])
                 ->groupBy('status')
                 ->pluck('total', 'status'),
-            'fingerprintActivities' => FingerprintSyncHistory::with('fingerprint')->latest()->limit(6)->get(),
             'activities' => ActivityLog::latest()->limit(8)->get(),
         ]);
     }
