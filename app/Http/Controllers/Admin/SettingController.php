@@ -45,7 +45,7 @@ class SettingController extends Controller
         AttendanceSetting::updateOrCreate(
             ['id' => $request->integer('id') ?: null],
             $request->validate([
-                'day_of_week' => ['nullable', 'integer', 'between:1,7'],
+                'day_of_week' => ['nullable', 'integer', 'between:1,5'],
                 'name' => ['required', 'string', 'max:100'],
                 'check_in_start' => ['required', 'date_format:H:i'],
                 'check_in_end' => ['required', 'date_format:H:i'],

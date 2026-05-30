@@ -8,6 +8,7 @@ use App\Models\AbsencePermission;
 use App\Models\AttendanceLog;
 use App\Models\AttendanceSetting;
 use App\Models\Student;
+use App\Services\SchoolCalendar;
 use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 
@@ -18,7 +19,7 @@ class AttendanceController extends Controller
         return view('attendance.barcode');
     }
 
-    public function storeBarcode(Request $request)
+    public function storeBarcode(Request $request, SchoolCalendar $calendar)
     {
         $data = $request->validate([
             'barcode' => ['required', 'string', 'max:80'],
@@ -38,6 +39,11 @@ class AttendanceController extends Controller
         }
 
         $now = now();
+
+        if ($calendar->isHoliday($now)) {
+            return $this->barcodeResponse($request, false, 'Absensi ditutup: '.$calendar->holidayName($now).'.');
+        }
+
         $today = $now->toDateString();
         $time = $now->format('H:i:s');
         $mode = $data['attendance_type'] ?? 'auto';
@@ -97,9 +103,14 @@ class AttendanceController extends Controller
         return view('attendance.absence', ['students' => Student::where('is_active', true)->orderBy('name')->get()]);
     }
 
-    public function storeAbsence(AbsencePermissionRequest $request)
+    public function storeAbsence(AbsencePermissionRequest $request, SchoolCalendar $calendar)
     {
         $owner = Student::findOrFail((int) $request->attendable_id);
+        $absenceDate = \Illuminate\Support\Carbon::parse($request->absence_date);
+
+        if ($calendar->isHoliday($absenceDate)) {
+            return back()->with('error', 'Ketidakhadiran tidak dapat dicatat pada '.$calendar->holidayName($absenceDate).'.');
+        }
 
         AbsencePermission::create([
             'attendable_type' => $owner::class,

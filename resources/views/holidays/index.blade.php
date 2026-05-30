@@ -10,7 +10,16 @@
         <button class="mt-5 rounded-xl bg-emerald-900 px-5 py-3 font-semibold text-white">Simpan</button>
     </form>
     <section class="xl:col-span-2 rounded-3xl bg-white p-6 shadow-sm">
-        <h2 class="font-bold text-emerald-950">Kalender Visual</h2>
+        <div class="rounded-3xl border border-emerald-100 bg-emerald-50/60 p-5">
+            <h2 class="font-bold text-emerald-950">Libur Rutin Otomatis</h2>
+            <p class="mt-1 text-sm text-slate-600">Sekolah aktif Senin sampai Jumat. Sistem otomatis menutup absensi setiap akhir pekan.</p>
+            <div class="mt-4 flex flex-wrap gap-2">
+                @foreach($weeklyHolidays as $day)
+                    <span class="rounded-full bg-emerald-900 px-4 py-2 text-sm font-semibold text-white">{{ $day }}</span>
+                @endforeach
+            </div>
+        </div>
+        <h2 class="mt-6 font-bold text-emerald-950">Kalender Visual</h2>
         <div class="mt-5 grid gap-3 md:grid-cols-2">
             @foreach($holidays as $holiday)
                 <article class="rounded-3xl border border-emerald-100 bg-emerald-50/40 p-4">

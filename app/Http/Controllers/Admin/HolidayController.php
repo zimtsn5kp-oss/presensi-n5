@@ -10,7 +10,10 @@ class HolidayController extends Controller
 {
     public function index()
     {
-        return view('holidays.index', ['holidays' => Holiday::latest('start_date')->get()]);
+        return view('holidays.index', [
+            'holidays' => Holiday::latest('start_date')->get(),
+            'weeklyHolidays' => ['Sabtu', 'Minggu'],
+        ]);
     }
 
     public function store(Request $request)

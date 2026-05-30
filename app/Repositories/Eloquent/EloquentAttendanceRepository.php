@@ -5,16 +5,22 @@ namespace App\Repositories\Eloquent;
 use App\Models\AttendanceLog;
 use App\Models\Student;
 use App\Repositories\Contracts\AttendanceRepository;
+use App\Services\SchoolCalendar;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class EloquentAttendanceRepository implements AttendanceRepository
 {
+    public function __construct(private readonly SchoolCalendar $calendar)
+    {
+    }
+
     public function dashboardMetrics(): array
     {
         $today = today();
         $activeStudents = Student::where('is_active', true)->count();
+        $isHoliday = $this->calendar->isHoliday($today);
 
         $studentPresent = AttendanceLog::whereDate('attendance_date', $today)
             ->where('attendable_type', Student::class)
@@ -25,7 +31,7 @@ class EloquentAttendanceRepository implements AttendanceRepository
             'student_present' => $studentPresent,
             'late' => AttendanceLog::whereDate('attendance_date', $today)->where('attendable_type', Student::class)->where('status', 'terlambat')->count(),
             'absent' => AttendanceLog::whereDate('attendance_date', $today)->where('attendable_type', Student::class)->whereIn('status', ['izin', 'sakit', 'alfa'])->count(),
-            'not_checked_in' => max($activeStudents - AttendanceLog::whereDate('attendance_date', $today)->where('attendable_type', Student::class)->distinct('attendable_id')->count('attendable_id'), 0),
+            'not_checked_in' => $isHoliday ? 0 : max($activeStudents - AttendanceLog::whereDate('attendance_date', $today)->where('attendable_type', Student::class)->distinct('attendable_id')->count('attendable_id'), 0),
         ];
     }
 
@@ -36,7 +42,9 @@ class EloquentAttendanceRepository implements AttendanceRepository
             return 0;
         }
 
-        $workdays = collect(CarbonPeriod::create(now()->startOfMonth(), now()))->filter(fn ($date) => $date->isWeekday())->count();
+        $workdays = collect(CarbonPeriod::create(now()->startOfMonth(), now()))
+            ->reject(fn ($date) => $this->calendar->isHoliday($date))
+            ->count();
         $present = AttendanceLog::whereMonth('attendance_date', now()->month)
             ->whereYear('attendance_date', now()->year)
             ->where('attendable_type', Student::class)

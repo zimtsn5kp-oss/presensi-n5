@@ -17,7 +17,7 @@
     <form method="post" action="{{ route('settings.attendance') }}" class="rounded-3xl bg-white p-6 shadow-sm">@csrf
         <h2 class="font-bold text-emerald-950">Jam Absensi</h2>
         <div class="mt-5 grid gap-4 md:grid-cols-2">
-            <label class="text-sm font-semibold">Hari<select name="day_of_week" class="mt-2 w-full rounded-2xl border px-4 py-3"><option value="">Global</option>@foreach([1=>'Senin',2=>'Selasa',3=>'Rabu',4=>'Kamis',5=>'Jumat',6=>'Sabtu',7=>'Ahad'] as $k=>$v)<option value="{{ $k }}">{{ $v }}</option>@endforeach</select></label>
+            <label class="text-sm font-semibold">Hari<select name="day_of_week" class="mt-2 w-full rounded-2xl border px-4 py-3"><option value="">Global</option>@foreach([1=>'Senin',2=>'Selasa',3=>'Rabu',4=>'Kamis',5=>'Jumat'] as $k=>$v)<option value="{{ $k }}">{{ $v }}</option>@endforeach</select></label>
             <label class="text-sm font-semibold">Nama shift<input name="name" value="Reguler" class="mt-2 w-full rounded-2xl border px-4 py-3"></label>
             <label class="text-sm font-semibold">Mulai masuk<input type="time" name="check_in_start" value="06:00" class="mt-2 w-full rounded-2xl border px-4 py-3"></label>
             <label class="text-sm font-semibold">Akhir masuk<input type="time" name="check_in_end" value="07:30" class="mt-2 w-full rounded-2xl border px-4 py-3"></label>
