@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\HolidayController;
+use App\Http\Controllers\Admin\MonthlyRecapController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\StudentController;
@@ -56,5 +57,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/excel', [ReportController::class, 'excel'])->name('reports.excel');
         Route::get('reports/pdf', [ReportController::class, 'pdf'])->name('reports.pdf');
+        Route::get('recaps/monthly', MonthlyRecapController::class)->name('recaps.monthly');
     });
 });
