@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'role_id' => $admin->id,
             'name' => 'Administrator Madrasah',
+            'username' => 'admin',
             'email' => 'admin@madrasah.test',
             'password' => Hash::make('password'),
         ]);
@@ -44,6 +45,7 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'role_id' => $teacherRole->id,
             'name' => 'Guru Piket',
+            'username' => 'guru',
             'email' => 'guru@madrasah.test',
             'password' => Hash::make('password'),
         ]);
