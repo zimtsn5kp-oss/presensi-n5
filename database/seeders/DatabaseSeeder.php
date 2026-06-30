@@ -42,14 +42,6 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
         ]);
 
-        User::factory()->create([
-            'role_id' => $teacherRole->id,
-            'name' => 'Guru Piket',
-            'username' => 'guru',
-            'email' => 'guru@madrasah.test',
-            'password' => Hash::make('password'),
-        ]);
-
         SchoolSetting::firstOrCreate([], [
             'school_name' => 'Madrasah Nurul Ilmi',
             'address' => 'Jl. Pendidikan Islam No. 7',
@@ -66,10 +58,12 @@ class DatabaseSeeder extends Seeder
             ['nisn' => '0061234504', 'name' => 'Siti Maryam', 'classroom' => '9A', 'gender' => 'P'],
         ])->map(fn ($data) => Student::firstOrCreate(['nisn' => $data['nisn']], $data));
 
-        collect([
+        $teachers = collect([
             ['nip' => '198812122010011001', 'name' => 'Ust. Hasan Basri', 'subject' => 'Fiqih'],
             ['nip' => '199105052014012002', 'name' => 'Usth. Nur Aulia', 'subject' => 'Bahasa Arab'],
         ])->map(fn ($data) => Teacher::firstOrCreate(['nip' => $data['nip']], $data));
+
+        $teachers->each(fn (Teacher $teacher) => app(\App\Services\TeacherAccountService::class)->sync($teacher));
 
         foreach (range(1, 5) as $day) {
             AttendanceSetting::firstOrCreate(['day_of_week' => $day, 'name' => 'Reguler'], [

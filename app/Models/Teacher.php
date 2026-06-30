@@ -22,6 +22,11 @@ class Teacher extends Model
         return $this->morphMany(AttendanceLog::class, 'attendable');
     }
 
+    public function user()
+    {
+        return $this->hasOne(User::class);
+    }
+
     public function fingerprintTemplates()
     {
         return $this->morphMany(FingerprintTemplate::class, 'owner');

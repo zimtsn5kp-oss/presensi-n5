@@ -13,13 +13,18 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    protected $fillable = ['role_id', 'name', 'username', 'email', 'password', 'is_active'];
+    protected $fillable = ['role_id', 'teacher_id', 'name', 'username', 'email', 'password', 'is_active'];
 
     protected $hidden = ['password', 'remember_token'];
 
     public function role()
     {
         return $this->belongsTo(Role::class);
+    }
+
+    public function teacher()
+    {
+        return $this->belongsTo(Teacher::class);
     }
 
     public function hasRole(string $role): bool

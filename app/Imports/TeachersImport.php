@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Teacher;
+use App\Services\TeacherAccountService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -22,11 +23,12 @@ class TeachersImport implements ToCollection, WithHeadingRow
             ->values();
 
         Validator::make($rows->toArray(), [
-            '*.nip' => ['nullable', 'string', 'max:40', 'distinct'],
+            '*.nip' => ['required', 'string', 'max:40', 'distinct'],
             '*.nama' => ['required', 'string', 'max:150'],
             '*.mapel' => ['nullable', 'string', 'max:100'],
             '*.aktif' => ['nullable', Rule::in(['1', 1, '0', 0, 'ya', 'tidak', 'aktif', 'nonaktif'])],
         ], [
+            '*.nip.required' => 'Kolom NIP wajib diisi untuk membuat akun login guru.',
             '*.nip.distinct' => 'NIP tidak boleh duplikat di file import.',
             '*.nama.required' => 'Kolom nama wajib diisi.',
         ])->validate();
@@ -48,6 +50,7 @@ class TeachersImport implements ToCollection, WithHeadingRow
                 'is_active' => $this->activeValue($row['aktif'] ?? '1'),
             ]);
             $teacher->save();
+            app(TeacherAccountService::class)->sync($teacher);
 
             $wasRecentlyCreated ? $this->created++ : $this->updated++;
         }

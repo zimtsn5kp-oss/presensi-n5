@@ -24,13 +24,27 @@ Route::post('logout', [AuthController::class, 'logout'])->middleware('auth')->na
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 
-    Route::middleware('role:administrator')->group(function () {
+    Route::middleware('role:administrator,guru')->group(function () {
+        Route::get('students', [StudentController::class, 'index'])->name('students.index');
         Route::get('students/data', [StudentController::class, 'data'])->name('students.data');
+
+        Route::get('attendance/barcode', [AttendanceController::class, 'barcodeForm'])->name('attendance.barcode');
+        Route::post('attendance/barcode', [AttendanceController::class, 'storeBarcode'])->name('attendance.barcode.store');
+        Route::get('attendance/absence', [AttendanceController::class, 'absenceForm'])->name('attendance.absence');
+        Route::post('attendance/absence', [AttendanceController::class, 'storeAbsence'])->name('attendance.absence.store');
+
+        Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('reports/excel', [ReportController::class, 'excel'])->name('reports.excel');
+        Route::get('reports/pdf', [ReportController::class, 'pdf'])->name('reports.pdf');
+        Route::get('recaps/monthly', MonthlyRecapController::class)->name('recaps.monthly');
+    });
+
+    Route::middleware('role:administrator')->group(function () {
         Route::get('students/export/excel', [StudentController::class, 'exportExcel'])->name('students.export.excel');
         Route::get('students/export/pdf', [StudentController::class, 'exportPdf'])->name('students.export.pdf');
         Route::get('students/import/template', [StudentController::class, 'importTemplate'])->name('students.import.template');
         Route::post('students/import', [StudentController::class, 'import'])->name('students.import');
-        Route::resource('students', StudentController::class)->except('show');
+        Route::resource('students', StudentController::class)->except(['index', 'show']);
 
         Route::get('teachers/data', [TeacherController::class, 'data'])->name('teachers.data');
         Route::get('teachers/export/excel', [TeacherController::class, 'exportExcel'])->name('teachers.export.excel');
@@ -48,15 +62,4 @@ Route::middleware(['auth'])->group(function () {
         Route::post('settings/attendance', [SettingController::class, 'storeAttendance'])->name('settings.attendance');
     });
 
-    Route::middleware('role:administrator,guru')->group(function () {
-        Route::get('attendance/barcode', [AttendanceController::class, 'barcodeForm'])->name('attendance.barcode');
-        Route::post('attendance/barcode', [AttendanceController::class, 'storeBarcode'])->name('attendance.barcode.store');
-        Route::get('attendance/absence', [AttendanceController::class, 'absenceForm'])->name('attendance.absence');
-        Route::post('attendance/absence', [AttendanceController::class, 'storeAbsence'])->name('attendance.absence.store');
-
-        Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
-        Route::get('reports/excel', [ReportController::class, 'excel'])->name('reports.excel');
-        Route::get('reports/pdf', [ReportController::class, 'pdf'])->name('reports.pdf');
-        Route::get('recaps/monthly', MonthlyRecapController::class)->name('recaps.monthly');
-    });
 });

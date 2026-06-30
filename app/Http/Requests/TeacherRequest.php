@@ -17,9 +17,10 @@ class TeacherRequest extends FormRequest
         $teacher = $this->route('teacher');
 
         return [
-            'nip' => ['nullable', 'string', 'max:40', Rule::unique('teachers', 'nip')->ignore($teacher)],
+            'nip' => ['required', 'string', 'max:40', Rule::unique('teachers', 'nip')->ignore($teacher), Rule::unique('users', 'username')->ignore($teacher?->user)],
             'name' => ['required', 'string', 'max:150'],
             'subject' => ['nullable', 'string', 'max:100'],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'is_active' => ['nullable', 'boolean'],
         ];
     }

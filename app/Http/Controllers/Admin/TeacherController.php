@@ -9,6 +9,7 @@ use App\Http\Requests\TeacherRequest;
 use App\Imports\TeachersImport;
 use App\Models\Teacher;
 use App\Services\ActivityLogger;
+use App\Services\TeacherAccountService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
@@ -35,9 +36,11 @@ class TeacherController extends Controller
         return view('teachers.form', ['teacher' => new Teacher()]);
     }
 
-    public function store(TeacherRequest $request, ActivityLogger $logger)
+    public function store(TeacherRequest $request, ActivityLogger $logger, TeacherAccountService $accounts)
     {
-        $teacher = Teacher::create($request->validated() + ['is_active' => $request->boolean('is_active', true)]);
+        $data = $request->safe()->except(['password', 'password_confirmation']);
+        $teacher = Teacher::create($data + ['is_active' => $request->boolean('is_active', true)]);
+        $accounts->sync($teacher);
         $logger->record('teacher.created', $teacher);
 
         return redirect()->route('teachers.index')->with('success', 'Data guru berhasil ditambahkan.');
@@ -48,17 +51,20 @@ class TeacherController extends Controller
         return view('teachers.form', compact('teacher'));
     }
 
-    public function update(TeacherRequest $request, Teacher $teacher, ActivityLogger $logger)
+    public function update(TeacherRequest $request, Teacher $teacher, ActivityLogger $logger, TeacherAccountService $accounts)
     {
-        $teacher->update($request->validated() + ['is_active' => $request->boolean('is_active')]);
+        $data = $request->safe()->except(['password', 'password_confirmation']);
+        $teacher->update($data + ['is_active' => $request->boolean('is_active')]);
+        $accounts->sync($teacher, $request->string('password')->toString() ?: null);
         $logger->record('teacher.updated', $teacher);
 
         return redirect()->route('teachers.index')->with('success', 'Data guru berhasil diperbarui.');
     }
 
-    public function destroy(Teacher $teacher, ActivityLogger $logger)
+    public function destroy(Teacher $teacher, ActivityLogger $logger, TeacherAccountService $accounts)
     {
         $logger->record('teacher.deleted', $teacher);
+        $accounts->deactivate($teacher);
         $teacher->delete();
 
         return back()->with('success', 'Data guru dihapus.');

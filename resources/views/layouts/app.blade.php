@@ -67,7 +67,9 @@
                     ['Pengaturan', 'settings.index', 'M19.4 13.5a7.8 7.8 0 0 0 0-3l2-1.5-2-3.5-2.4 1a8 8 0 0 0-2.6-1.5L14 2h-4l-.4 3a8 8 0 0 0-2.6 1.5l-2.4-1-2 3.5 2 1.5a7.8 7.8 0 0 0 0 3l-2 1.5 2 3.5 2.4-1a8 8 0 0 0 2.6 1.5l.4 3h4l.4-3a8 8 0 0 0 2.6-1.5l2.4 1 2-3.5-2-1.5ZM12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z'],
                 ];
             @endphp
+            @php($adminOnlyRoutes = ['teachers.index', 'holidays.index', 'backups.index', 'settings.index'])
             @foreach($items as [$label, $route, $path])
+                @continue(in_array($route, $adminOnlyRoutes, true) && ! auth()->user()->hasRole('administrator'))
                 <a href="{{ Route::has($route) ? route($route) : '#' }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition {{ request()->routeIs($route) ? 'bg-white text-emerald-950 shadow' : 'text-emerald-50 hover:bg-white/10' }}">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="{{ $path }}"/></svg>
                     <span class="sidebar-label">{{ $label }}</span>

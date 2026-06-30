@@ -29,11 +29,16 @@ class StudentController extends Controller
             ->select('students.*')
             ->when($request->filled('classroom'), fn ($query) => $query->where('classroom', $request->string('classroom')));
 
-        return DataTables::of($query)
+        $table = DataTables::of($query)
             ->addColumn('status_badge', fn ($student) => view('partials.status', ['active' => $student->is_active])->render())
-            ->addColumn('actions', fn ($student) => view('students.partials.actions', compact('student'))->render())
-            ->rawColumns(['status_badge', 'actions'])
-            ->make();
+            ->rawColumns(['status_badge']);
+
+        if ($request->user()->hasRole('administrator')) {
+            $table->addColumn('actions', fn ($student) => view('students.partials.actions', compact('student'))->render())
+                ->rawColumns(['status_badge', 'actions']);
+        }
+
+        return $table->make();
     }
 
     public function create()
