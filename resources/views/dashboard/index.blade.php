@@ -1,72 +1,91 @@
 @extends('layouts.app', ['title' => 'Dashboard'])
 
 @section('content')
-<div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+<div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-5">
     @foreach([
-        ['Total hadir siswa', $metrics['student_present'], 'bg-emerald-600'],
-        ['Terlambat', $metrics['late'], 'bg-amber-500'],
-        ['Tidak hadir', $metrics['absent'], 'bg-red-500'],
-        ['Belum absen', $metrics['not_checked_in'], 'bg-slate-700'],
-    ] as [$label, $value, $color])
-        <div class="rounded-3xl border border-white bg-white p-5 shadow-sm">
-            <div class="h-2 w-12 rounded-full {{ $color }}"></div>
-            <p class="mt-5 text-sm text-slate-500">{{ $label }}</p>
-            <p class="mt-2 text-4xl font-black text-emerald-950">{{ $value }}</p>
-        </div>
+        ['Total Siswa', $metrics['total_students'], 'bg-teal-600', null],
+        ['Siswa Hadir', $metrics['student_present'], 'bg-emerald-600', null],
+        ['Terlambat', $metrics['late'], 'bg-amber-500', 'late'],
+        ['Tidak Hadir', $metrics['absent'], 'bg-red-500', 'absent'],
+        ['Belum Absen', $metrics['not_checked_in'], 'bg-slate-700', 'not_checked_in'],
+    ] as [$label, $value, $color, $detail])
+        @if($detail)
+            <a href="{{ route('dashboard', ['detail' => $detail]) }}#detail-siswa" class="rounded-3xl border border-white bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                <div class="h-2 w-12 rounded-full {{ $color }}"></div>
+                <div class="mt-5 flex items-center justify-between gap-3">
+                    <p class="text-sm text-slate-500">{{ $label }}</p>
+                    <span class="text-lg text-slate-400">&rsaquo;</span>
+                </div>
+                <p class="mt-2 text-4xl font-black text-emerald-950">{{ $value }}</p>
+            </a>
+        @else
+            <div class="rounded-3xl border border-white bg-white p-5 shadow-sm">
+                <div class="h-2 w-12 rounded-full {{ $color }}"></div>
+                <p class="mt-5 text-sm text-slate-500">{{ $label }}</p>
+                <p class="mt-2 text-4xl font-black text-emerald-950">{{ $value }}</p>
+            </div>
+        @endif
     @endforeach
 </div>
 
-<div class="mt-6 grid gap-6 xl:grid-cols-3">
-    <section class="rounded-3xl bg-white p-6 shadow-sm xl:col-span-2">
-        <div class="flex items-center justify-between">
-            <h2 class="font-bold text-emerald-950">Grafik Kehadiran Harian</h2>
-            <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">Auto refresh ready</span>
+@if($detailType)
+    <section id="detail-siswa" class="mt-6 rounded-3xl bg-white p-6 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h2 class="font-bold text-emerald-950">{{ $detailTitle }}</h2>
+                <p class="text-sm text-slate-500">{{ now()->isoFormat('dddd, D MMMM YYYY') }}</p>
+            </div>
+            <a href="{{ route('dashboard') }}" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600">Tutup</a>
         </div>
-        <div id="dailyChart" class="mt-4"></div>
+        <div class="mt-5 overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead><tr class="border-b text-emerald-800"><th class="py-3">NISN</th><th>Nama Siswa</th><th>Kelas</th><th>Status</th><th>Jam Masuk</th></tr></thead>
+                <tbody>
+                    @forelse($detailRows as $row)
+                        <tr class="border-b border-slate-100"><td class="py-3">{{ $row['student']->nisn }}</td><td class="font-semibold">{{ $row['student']->name }}</td><td>{{ $row['student']->classroom }}</td><td>{{ $row['status'] }}</td><td>{{ $row['check_in_at'] ?? '-' }}</td></tr>
+                    @empty
+                        <tr><td colspan="5" class="py-8 text-center text-slate-500">Tidak ada data siswa.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </section>
-    <section class="rounded-3xl bg-white p-6 shadow-sm">
-        <h2 class="font-bold text-emerald-950">Persentase Bulanan</h2>
-        <div id="monthlyChart" class="mt-4"></div>
-    </section>
-</div>
+@endif
 
-<div class="mt-6 grid gap-6 xl:grid-cols-2">
-    <section class="rounded-3xl bg-white p-6 shadow-sm">
-        <h2 class="font-bold text-emerald-950">Keterlambatan Mingguan</h2>
-        <div id="lateChart" class="mt-4"></div>
-    </section>
-    <section class="rounded-3xl bg-white p-6 shadow-sm">
-        <h2 class="font-bold text-emerald-950">Izin/Sakit/Alfa</h2>
-        <div class="mt-5 space-y-3">
-            @foreach(['izin' => 'Izin', 'sakit' => 'Sakit', 'alfa' => 'Alfa'] as $key => $label)
-                <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
-                    <span>{{ $label }}</span><strong>{{ $absenceStats[$key] ?? 0 }}</strong>
-                </div>
-            @endforeach
+<section class="mt-6 rounded-3xl bg-white p-6 shadow-sm">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+            <h2 class="font-bold text-emerald-950">Grafik Kehadiran, Sakit, Izin, dan Alfa</h2>
+            <p class="text-sm text-slate-500">{{ $statusChart['title'] }}</p>
         </div>
-    </section>
-</div>
+        <form class="flex w-full items-end gap-3 sm:w-auto">
+            <label class="min-w-48 flex-1 text-sm font-semibold text-emerald-950">Filter Kelas
+                <select name="classroom" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3">
+                    <option value="">Semua Kelas</option>
+                    @foreach($classrooms as $classroom)
+                        <option value="{{ $classroom }}" @selected($selectedClassroom===$classroom)>{{ $classroom }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <button class="rounded-2xl bg-emerald-900 px-5 py-3 font-semibold text-white">Tampilkan</button>
+        </form>
+    </div>
+    <div id="statusChart" class="mt-5"></div>
+</section>
 @endsection
 
 @push('scripts')
 <script>
-const green = '#047857', gold = '#d97706';
-new ApexCharts(document.querySelector('#dailyChart'), {
-    chart: {type: 'area', height: 310, toolbar: {show:false}},
-    colors: [green], stroke: {curve:'smooth', width:3}, fill: {type:'gradient', gradient:{opacityFrom:.35, opacityTo:.05}},
-    series: [{name: 'Hadir', data: @json($dailyChart['series'])}],
-    xaxis: {categories: @json($dailyChart['labels'])}
-}).render();
-new ApexCharts(document.querySelector('#lateChart'), {
-    chart: {type: 'bar', height: 260, toolbar: {show:false}},
-    colors: [gold], plotOptions: {bar:{borderRadius:8}},
-    series: [{name: 'Terlambat', data: @json($lateChart['series'])}],
-    xaxis: {categories: @json($lateChart['labels'])}
-}).render();
-new ApexCharts(document.querySelector('#monthlyChart'), {
-    chart: {type: 'radialBar', height: 280},
-    colors: [green], series: [{{ $monthlyPercentage }}],
-    labels: ['Kehadiran'], plotOptions: {radialBar:{hollow:{size:'65%'}, dataLabels:{value:{fontSize:'34px', fontWeight:800}}}}
+new ApexCharts(document.querySelector('#statusChart'), {
+    chart: {type: 'line', height: 390, toolbar: {show: false}},
+    colors: ['#059669', '#f59e0b', '#2563eb', '#dc2626'],
+    series: @json($statusChart['series']),
+    stroke: {curve: 'smooth', width: 3},
+    markers: {size: 3},
+    xaxis: {categories: @json($statusChart['labels']), title: {text: 'Tanggal'}},
+    yaxis: {min: 0, forceNiceScale: true, title: {text: 'Jumlah Siswa'}},
+    legend: {position: 'top', horizontalAlign: 'left'},
+    grid: {borderColor: '#e2e8f0'}
 }).render();
 setTimeout(() => location.reload(), 300000);
 </script>

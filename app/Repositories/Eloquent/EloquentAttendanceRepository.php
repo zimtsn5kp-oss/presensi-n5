@@ -28,6 +28,7 @@ class EloquentAttendanceRepository implements AttendanceRepository
             ->count();
 
         return [
+            'total_students' => $activeStudents,
             'student_present' => $studentPresent,
             'late' => AttendanceLog::whereDate('attendance_date', $today)->where('attendable_type', Student::class)->where('status', 'terlambat')->count(),
             'absent' => AttendanceLog::whereDate('attendance_date', $today)->where('attendable_type', Student::class)->whereIn('status', ['izin', 'sakit', 'alfa'])->count(),
