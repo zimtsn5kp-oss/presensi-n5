@@ -14,25 +14,45 @@
     <style>
         [x-cloak]{display:none} .dt-input{border:1px solid #d1d5db;border-radius:.75rem;padding:.45rem .7rem}
         table.dataTable thead th{color:#065f46}
+        #appSidebar{width:18rem;transition:width .2s ease,transform .2s ease}
+        #appMain{transition:padding-left .2s ease}
+        #sidebarOverlay{display:none}
+        @media (max-width:1023px){
+            #appSidebar{transform:translateX(-100%)}
+            body.sidebar-open #appSidebar{transform:translateX(0)}
+            body.sidebar-open #sidebarOverlay{display:block}
+        }
+        @media (min-width:1024px){
+            #appMain{padding-left:18rem}
+            body.sidebar-collapsed #appSidebar{width:5rem}
+            body.sidebar-collapsed #appMain{padding-left:5rem}
+            body.sidebar-collapsed .sidebar-label,
+            body.sidebar-collapsed .sidebar-brand-text{display:none}
+            body.sidebar-collapsed .sidebar-brand{justify-content:center;padding-left:.75rem;padding-right:.75rem}
+            body.sidebar-collapsed .sidebar-logo{height:3rem;width:3rem;flex:none}
+            body.sidebar-collapsed .sidebar-nav{padding-left:.5rem;padding-right:.5rem}
+            body.sidebar-collapsed .sidebar-nav a{justify-content:center;padding-left:.75rem;padding-right:.75rem}
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
-<div class="min-h-screen lg:flex">
-    <aside class="bg-emerald-950 text-white lg:fixed lg:inset-y-0 lg:w-72">
-        <div class="flex h-20 items-center gap-3 px-6">
+<div id="sidebarOverlay" class="fixed inset-0 z-30 bg-slate-950/50 lg:hidden"></div>
+<div class="min-h-screen">
+    <aside id="appSidebar" class="fixed inset-y-0 left-0 z-40 overflow-y-auto bg-emerald-950 text-white">
+        <div class="sidebar-brand flex h-20 items-center gap-3 px-6">
             @if($schoolSetting?->logo_path)
-                <div class="grid h-14 w-14 place-items-center overflow-hidden rounded-2xl bg-white p-1 shadow">
+                <div class="sidebar-logo grid h-14 w-14 place-items-center overflow-hidden rounded-2xl bg-white p-1 shadow">
                     <img src="{{ asset('storage/'.$schoolSetting->logo_path) }}" alt="Logo {{ $schoolSetting->school_name }}" class="h-full w-full object-contain">
                 </div>
             @else
-                <div class="grid h-11 w-11 place-items-center rounded-2xl bg-amber-300 text-emerald-950 font-black">A</div>
+                <div class="sidebar-logo grid h-11 w-11 place-items-center rounded-2xl bg-amber-300 font-black text-emerald-950">A</div>
             @endif
-            <div>
+            <div class="sidebar-brand-text">
                 <p class="font-bold leading-tight">{{ $schoolSetting?->school_name ?? 'Absensi Madrasah' }}</p>
                 <p class="text-xs text-emerald-100">Barcode Attendance System</p>
             </div>
         </div>
-        <nav class="space-y-1 px-4 pb-6">
+        <nav class="sidebar-nav space-y-1 px-4 pb-6">
             @php
                 $items = [
                     ['Dashboard', 'dashboard', 'M4 13h6V4H4v9Zm10 7h6V4h-6v16ZM4 20h6v-5H4v5Zm10 0h6v-9h-6v9Z'],
@@ -50,17 +70,22 @@
             @foreach($items as [$label, $route, $path])
                 <a href="{{ Route::has($route) ? route($route) : '#' }}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition {{ request()->routeIs($route) ? 'bg-white text-emerald-950 shadow' : 'text-emerald-50 hover:bg-white/10' }}">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="{{ $path }}"/></svg>
-                    <span>{{ $label }}</span>
+                    <span class="sidebar-label">{{ $label }}</span>
                 </a>
             @endforeach
         </nav>
     </aside>
-    <main class="min-w-0 flex-1 lg:pl-72">
+    <main id="appMain" class="min-w-0">
         <header class="sticky top-0 z-20 border-b border-emerald-100 bg-white/90 px-5 py-4 backdrop-blur">
             <div class="flex items-center justify-between gap-4">
-                <div>
-                    <p class="text-xs uppercase tracking-[.2em] text-emerald-700">Madrasah SaaS</p>
-                    <h1 class="text-xl font-bold text-emerald-950">{{ $title ?? 'Dashboard' }}</h1>
+                <div class="flex min-w-0 items-center gap-3">
+                    <button id="sidebarToggle" type="button" title="Buka atau tutup sidebar" aria-label="Buka atau tutup sidebar" aria-expanded="true" class="grid h-11 w-11 flex-none place-items-center rounded-xl border border-slate-200 text-emerald-950 hover:bg-emerald-50">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    </button>
+                    <div class="min-w-0">
+                        <p class="text-xs uppercase tracking-[.2em] text-emerald-700">Madrasah SaaS</p>
+                        <h1 class="truncate text-xl font-bold text-emerald-950">{{ $title ?? 'Dashboard' }}</h1>
+                    </div>
                 </div>
                 <form method="post" action="{{ route('logout') }}">@csrf
                     <button class="rounded-xl bg-emerald-900 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-800">Keluar</button>
@@ -80,6 +105,59 @@
         </section>
     </main>
 </div>
+<script>
+const sidebarBody = document.body;
+const sidebarToggle = document.getElementById('sidebarToggle');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
+const desktopSidebar = window.matchMedia('(min-width: 1024px)');
+
+function updateSidebarState() {
+    const expanded = desktopSidebar.matches
+        ? !sidebarBody.classList.contains('sidebar-collapsed')
+        : sidebarBody.classList.contains('sidebar-open');
+    sidebarToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+}
+
+if (desktopSidebar.matches && localStorage.getItem('prisma-sidebar-collapsed') === '1') {
+    sidebarBody.classList.add('sidebar-collapsed');
+}
+updateSidebarState();
+
+sidebarToggle.addEventListener('click', function () {
+    if (desktopSidebar.matches) {
+        sidebarBody.classList.toggle('sidebar-collapsed');
+        localStorage.setItem('prisma-sidebar-collapsed', sidebarBody.classList.contains('sidebar-collapsed') ? '1' : '0');
+    } else {
+        sidebarBody.classList.toggle('sidebar-open');
+    }
+    updateSidebarState();
+});
+
+sidebarOverlay.addEventListener('click', function () {
+    sidebarBody.classList.remove('sidebar-open');
+    updateSidebarState();
+});
+
+document.querySelectorAll('#appSidebar a').forEach(function (link) {
+    link.addEventListener('click', function () {
+        if (!desktopSidebar.matches) {
+            sidebarBody.classList.remove('sidebar-open');
+        }
+    });
+});
+
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+        sidebarBody.classList.remove('sidebar-open');
+        updateSidebarState();
+    }
+});
+
+desktopSidebar.addEventListener('change', function () {
+    sidebarBody.classList.remove('sidebar-open');
+    updateSidebarState();
+});
+</script>
 @stack('scripts')
 </body>
 </html>
