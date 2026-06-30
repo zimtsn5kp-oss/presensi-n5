@@ -77,15 +77,17 @@
 @push('scripts')
 <script>
 new ApexCharts(document.querySelector('#statusChart'), {
-    chart: {type: 'line', height: 390, toolbar: {show: false}},
+    chart: {type: 'bar', height: 390, stacked: true, toolbar: {show: false}},
     colors: ['#059669', '#f59e0b', '#2563eb', '#dc2626'],
     series: @json($statusChart['series']),
-    stroke: {curve: 'smooth', width: 3},
-    markers: {size: 3},
+    plotOptions: {bar: {borderRadius: 3, columnWidth: '72%'}},
+    dataLabels: {enabled: false},
+    stroke: {show: true, width: 1, colors: ['#ffffff']},
     xaxis: {categories: @json($statusChart['labels']), title: {text: 'Tanggal'}},
     yaxis: {min: 0, forceNiceScale: true, title: {text: 'Jumlah Siswa'}},
     legend: {position: 'top', horizontalAlign: 'left'},
-    grid: {borderColor: '#e2e8f0'}
+    grid: {borderColor: '#e2e8f0'},
+    tooltip: {shared: true, intersect: false}
 }).render();
 setTimeout(() => location.reload(), 300000);
 </script>
