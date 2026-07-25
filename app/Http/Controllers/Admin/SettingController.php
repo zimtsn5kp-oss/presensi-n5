@@ -50,8 +50,6 @@ class SettingController extends Controller
                 'check_in_start' => ['required', 'date_format:H:i'],
                 'check_in_end' => ['required', 'date_format:H:i'],
                 'late_after' => ['required', 'date_format:H:i'],
-                'check_out_start' => ['nullable', 'date_format:H:i'],
-                'check_out_end' => ['nullable', 'date_format:H:i'],
                 'is_ramadhan' => ['nullable', 'boolean'],
                 'is_active' => ['nullable', 'boolean'],
             ]) + ['is_ramadhan' => $request->boolean('is_ramadhan'), 'is_active' => $request->boolean('is_active', true)]

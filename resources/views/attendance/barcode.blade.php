@@ -22,16 +22,9 @@
 
         <form id="barcodeForm" method="post" action="{{ route('attendance.barcode.store') }}" class="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
             @csrf
-            <div class="grid gap-4 md:grid-cols-[1fr_220px]">
+            <div class="grid gap-4">
                 <label class="text-sm font-semibold text-emerald-950">Input scanner USB / kode manual
                     <input id="barcodeInput" name="barcode" autocomplete="off" autofocus placeholder="Scan atau ketik kode barcode" class="mt-2 w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-lg font-bold tracking-wide outline-none focus:border-emerald-500">
-                </label>
-                <label class="text-sm font-semibold text-emerald-950">Mode
-                    <select id="attendanceType" name="attendance_type" class="mt-2 w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3">
-                        <option value="auto">Otomatis</option>
-                        <option value="check_in">Masuk</option>
-                        <option value="check_out">Pulang</option>
-                    </select>
                 </label>
             </div>
             <button class="mt-4 w-full rounded-2xl bg-emerald-900 px-5 py-3 text-sm font-bold text-white shadow hover:bg-emerald-800 sm:w-auto">Simpan Scan</button>
@@ -56,7 +49,6 @@
 <script>
 const form = document.getElementById('barcodeForm');
 const input = document.getElementById('barcodeInput');
-const mode = document.getElementById('attendanceType');
 const result = document.getElementById('scanResult');
 const state = document.getElementById('scannerState');
 const cameraPreview = document.getElementById('cameraPreview');
@@ -84,7 +76,6 @@ function renderResult(payload, ok) {
         ${data.name ? `<div class="mt-4 space-y-2 text-sm text-slate-700">
             <div class="flex justify-between gap-3"><span>Nama</span><strong>${data.name}</strong></div>
             <div class="flex justify-between gap-3"><span>Masuk</span><strong>${data.check_in_at || '-'}</strong></div>
-            <div class="flex justify-between gap-3"><span>Pulang</span><strong>${data.check_out_at || '-'}</strong></div>
             <div class="flex justify-between gap-3"><span>Status</span><strong>${data.status || '-'}</strong></div>
         </div>` : ''}
     `;
@@ -109,7 +100,7 @@ async function submitBarcode(code) {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
         },
-        body: JSON.stringify({barcode: cleanCode, attendance_type: mode.value}),
+        body: JSON.stringify({barcode: cleanCode}),
     });
     const payload = await response.json();
     renderResult(payload, response.ok && payload.success);

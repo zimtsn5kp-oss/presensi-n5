@@ -23,7 +23,6 @@ class AttendanceController extends Controller
     {
         $data = $request->validate([
             'barcode' => ['required', 'string', 'max:80'],
-            'attendance_type' => ['nullable', 'in:auto,check_in,check_out'],
         ], [
             'barcode.required' => 'Kode barcode belum terbaca.',
         ]);
@@ -46,56 +45,33 @@ class AttendanceController extends Controller
 
         $today = $now->toDateString();
         $time = $now->format('H:i:s');
-        $mode = $data['attendance_type'] ?? 'auto';
         $log = AttendanceLog::firstOrNew([
             'attendable_type' => $owner::class,
             'attendable_id' => $owner->id,
             'attendance_date' => $today,
         ]);
 
-        $action = $this->resolveBarcodeAction($log, $mode);
-
-        if (! $action) {
-            return $this->barcodeResponse($request, false, $owner->name.' sudah memiliki absen masuk dan pulang hari ini.', $log);
+        if (filled($log->check_in_at)) {
+            return $this->barcodeResponse($request, false, $owner->name.' sudah memiliki absen masuk hari ini.', $log);
         }
 
-        if ($action === 'check_in') {
-            $lateMinutes = $this->lateMinutes($now);
-            $log->fill([
-                'check_in_at' => $time,
-                'status' => $lateMinutes > 0 ? 'terlambat' : 'hadir',
-                'late_minutes' => $lateMinutes,
-                'source' => 'barcode',
-                'note' => null,
-                'raw_payload' => [
-                    'barcode' => trim($data['barcode']),
-                    'scanner' => 'webcam-or-usb',
-                    'operator_id' => $request->user()?->id,
-                ],
-            ]);
-        }
-
-        if ($action === 'check_out') {
-            if (! $log->exists || blank($log->check_in_at)) {
-                return $this->barcodeResponse($request, false, 'Absen masuk belum tercatat untuk '.$owner->name.'.');
-            }
-
-            $log->fill([
-                'check_out_at' => $time,
-                'source' => 'barcode',
-                'raw_payload' => array_merge($log->raw_payload ?? [], [
-                    'last_barcode' => trim($data['barcode']),
-                    'last_scanner' => 'webcam-or-usb',
-                    'last_operator_id' => $request->user()?->id,
-                ]),
-            ]);
-        }
+        $lateMinutes = $this->lateMinutes($now);
+        $log->fill([
+            'check_in_at' => $time,
+            'status' => $lateMinutes > 0 ? 'terlambat' : 'hadir',
+            'late_minutes' => $lateMinutes,
+            'source' => 'barcode',
+            'note' => null,
+            'raw_payload' => [
+                'barcode' => trim($data['barcode']),
+                'scanner' => 'webcam-or-usb',
+                'operator_id' => $request->user()?->id,
+            ],
+        ]);
 
         $log->save();
 
-        $label = $action === 'check_in' ? 'masuk' : 'pulang';
-
-        return $this->barcodeResponse($request, true, 'Absen '.$label.' tersimpan untuk '.$owner->name.'.', $log);
+        return $this->barcodeResponse($request, true, 'Absen masuk tersimpan untuk '.$owner->name.'.', $log);
     }
 
     public function absenceForm()
@@ -147,23 +123,6 @@ class AttendanceController extends Controller
         return Student::where('nisn', $code)->first();
     }
 
-    private function resolveBarcodeAction(AttendanceLog $log, string $mode): ?string
-    {
-        if ($mode === 'check_in') {
-            return filled($log->check_in_at) ? null : 'check_in';
-        }
-
-        if ($mode === 'check_out') {
-            return filled($log->check_out_at) ? null : 'check_out';
-        }
-
-        if (blank($log->check_in_at)) {
-            return 'check_in';
-        }
-
-        return blank($log->check_out_at) ? 'check_out' : null;
-    }
-
     private function lateMinutes(CarbonInterface $now): int
     {
         $setting = AttendanceSetting::where('is_active', true)
@@ -192,7 +151,6 @@ class AttendanceController extends Controller
                     'name' => $log->attendable?->name,
                     'date' => $log->attendance_date?->format('Y-m-d'),
                     'check_in_at' => $log->check_in_at,
-                    'check_out_at' => $log->check_out_at,
                     'status' => $log->status,
                     'late_minutes' => $log->late_minutes,
                 ] : null,

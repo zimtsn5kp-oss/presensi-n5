@@ -22,8 +22,6 @@
             <label class="text-sm font-semibold">Mulai masuk<input type="time" name="check_in_start" value="06:00" class="mt-2 w-full rounded-2xl border px-4 py-3"></label>
             <label class="text-sm font-semibold">Akhir masuk<input type="time" name="check_in_end" value="07:30" class="mt-2 w-full rounded-2xl border px-4 py-3"></label>
             <label class="text-sm font-semibold">Batas terlambat<input type="time" name="late_after" value="07:00" class="mt-2 w-full rounded-2xl border px-4 py-3"></label>
-            <label class="text-sm font-semibold">Mulai pulang<input type="time" name="check_out_start" value="14:00" class="mt-2 w-full rounded-2xl border px-4 py-3"></label>
-            <label class="text-sm font-semibold">Akhir pulang<input type="time" name="check_out_end" value="16:00" class="mt-2 w-full rounded-2xl border px-4 py-3"></label>
             <label class="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" name="is_ramadhan" value="1"> Ramadhan</label>
         </div>
         <button class="mt-5 w-full rounded-xl bg-emerald-900 px-5 py-3 font-semibold text-white sm:w-auto">Simpan Jam</button>

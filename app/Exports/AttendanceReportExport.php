@@ -27,7 +27,6 @@ class AttendanceReportExport implements FromCollection, WithHeadings
                 'date' => $log->attendance_date?->format('Y-m-d'),
                 'name' => $log->attendable?->name ?? 'Tidak dikenali',
                 'check_in' => $log->check_in_at,
-                'check_out' => $log->check_out_at,
                 'status' => ucfirst($log->status),
                 'late_minutes' => $log->late_minutes,
                 'source' => $log->source,
@@ -36,6 +35,6 @@ class AttendanceReportExport implements FromCollection, WithHeadings
 
     public function headings(): array
     {
-        return ['Tanggal', 'Nama Murid', 'Masuk', 'Pulang', 'Status', 'Terlambat Menit', 'Sumber'];
+        return ['Tanggal', 'Nama Murid', 'Masuk', 'Status', 'Terlambat Menit', 'Sumber'];
     }
 }

@@ -8,9 +8,9 @@
         <button class="rounded-2xl bg-emerald-900 px-4 py-3 font-semibold text-white">Filter</button>
         <div class="grid gap-2 sm:flex"><a href="{{ route('reports.excel', request()->query()) }}" class="rounded-2xl border px-4 py-3 text-center font-semibold text-emerald-700">Excel</a><a href="{{ route('reports.pdf', request()->query()) }}" class="rounded-2xl border px-4 py-3 text-center font-semibold text-amber-700">PDF</a></div>
     </form>
-    <div class="mt-6 overflow-x-auto"><table class="min-w-[720px] w-full text-left text-sm"><thead><tr class="text-emerald-800"><th class="py-3">Tanggal</th><th>Nama</th><th>Masuk</th><th>Pulang</th><th>Status</th><th>Sumber</th></tr></thead><tbody>
-        @forelse($logs as $log)<tr class="border-t"><td class="py-3">{{ $log->attendance_date->format('d/m/Y') }}</td><td>{{ $log->attendable?->name ?? 'Tidak dikenali' }}</td><td>{{ $log->check_in_at ?? '-' }}</td><td>{{ $log->check_out_at ?? '-' }}</td><td>{{ ucfirst($log->status) }}</td><td>{{ $log->source }}</td></tr>@empty
-        <tr><td colspan="6" class="py-10 text-center text-slate-500">Tidak ada data laporan.</td></tr>@endforelse
+    <div class="mt-6 overflow-x-auto"><table class="min-w-[640px] w-full text-left text-sm"><thead><tr class="text-emerald-800"><th class="py-3">Tanggal</th><th>Nama</th><th>Masuk</th><th>Status</th><th>Sumber</th></tr></thead><tbody>
+        @forelse($logs as $log)<tr class="border-t"><td class="py-3">{{ $log->attendance_date->format('d/m/Y') }}</td><td>{{ $log->attendable?->name ?? 'Tidak dikenali' }}</td><td>{{ $log->check_in_at ?? '-' }}</td><td>{{ ucfirst($log->status) }}</td><td>{{ $log->source }}</td></tr>@empty
+        <tr><td colspan="5" class="py-10 text-center text-slate-500">Tidak ada data laporan.</td></tr>@endforelse
     </tbody></table></div>
     <div class="mt-5">{{ $logs->links() }}</div>
 </section>
