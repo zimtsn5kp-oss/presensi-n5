@@ -2,17 +2,45 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\MonthlyRecapExport;
 use App\Http\Controllers\Controller;
 use App\Models\AttendanceLog;
 use App\Models\Student;
 use App\Services\SchoolCalendar;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MonthlyRecapController extends Controller
 {
     public function __invoke(Request $request, SchoolCalendar $calendar)
+    {
+        return view('recaps.monthly', $this->recapData($request, $calendar));
+    }
+
+    public function excel(Request $request, SchoolCalendar $calendar)
+    {
+        $data = $this->recapData($request, $calendar);
+        $classroom = $data['filters']['classroom'] ?: 'semua-kelas';
+        $fileName = 'rekap-absensi-'.$data['filters']['year'].'-'.str_pad((string) $data['filters']['month'], 2, '0', STR_PAD_LEFT).'-'.$classroom.'.xlsx';
+
+        return Excel::download(new MonthlyRecapExport($data), $fileName);
+    }
+
+    public function pdf(Request $request, SchoolCalendar $calendar)
+    {
+        $data = $this->recapData($request, $calendar);
+        $classroom = $data['filters']['classroom'] ?: 'semua-kelas';
+        $fileName = 'rekap-absensi-'.$data['filters']['year'].'-'.str_pad((string) $data['filters']['month'], 2, '0', STR_PAD_LEFT).'-'.$classroom.'.pdf';
+
+        return Pdf::loadView('exports.monthly-recap', $data)
+            ->setPaper('a4', 'landscape')
+            ->download($fileName);
+    }
+
+    private function recapData(Request $request, SchoolCalendar $calendar): array
     {
         $filters = $request->validate([
             'classroom' => ['nullable', Rule::in($this->classrooms())],
@@ -69,14 +97,14 @@ class MonthlyRecapController extends Controller
             return compact('student', 'days', 'summary');
         });
 
-        return view('recaps.monthly', [
+        return [
             'classrooms' => $this->classrooms(),
             'months' => $this->months(),
             'filters' => compact('classroom', 'month', 'year'),
             'dates' => $dates,
             'rows' => $rows,
             'title' => $this->months()[$month].' '.$year,
-        ]);
+        ];
     }
 
     private function classrooms(): array

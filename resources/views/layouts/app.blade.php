@@ -61,8 +61,7 @@
                     ['Absensi', 'attendance.barcode', 'M4 5h4V3H2v6h2V5Zm12-2v2h4v4h2V3h-6Zm4 16h-4v2h6v-6h-2v4ZM4 15H2v6h6v-2H4v-4Zm3-6h2v2H7V9Zm4 0h6v2h-6V9Zm-4 4h10v2H7v-2Zm0 4h6v2H7v-2Zm8 0h2v2h-2v-2Z'],
                     ['Ketidakhadiran', 'attendance.absence', 'M12 2 3 6v6c0 5 4 8 9 10 5-2 9-5 9-10V6l-9-4Zm-1 6h2v4h4v2h-6V8Z'],
                     ['Hari Libur', 'holidays.index', 'M7 2h2v2h6V2h2v2h3v18H4V4h3V2Zm13 8H4v10h16V10Z'],
-                    ['Rekap Bulanan', 'recaps.monthly', 'M4 3h16v18H4V3Zm2 5h12V5H6v3Zm0 3v3h3v-3H6Zm5 0v3h3v-3h-3Zm5 0v3h2v-3h-2ZM6 16v3h3v-3H6Zm5 0v3h3v-3h-3Zm5 0v3h2v-3h-2Z'],
-                    ['Laporan', 'reports.index', 'M5 3h14v18H5V3Zm3 4v2h8V7H8Zm0 4v2h8v-2H8Zm0 4v2h5v-2H8Z'],
+                    ['Rekap Absensi', 'recaps.monthly', 'M4 3h16v18H4V3Zm2 5h12V5H6v3Zm0 3v3h3v-3H6Zm5 0v3h3v-3h-3Zm5 0v3h2v-3h-2ZM6 16v3h3v-3H6Zm5 0v3h3v-3h-3Zm5 0v3h2v-3h-2Z'],
                     ['Backup', 'backups.index', 'M12 3a9 9 0 0 0-9 9h3l-4 4-4-4h3a11 11 0 1 1 3.2 7.8l1.4-1.4A9 9 0 1 0 12 3Zm-1 5h2v5h4v2h-6V8Z'],
                     ['Pengaturan', 'settings.index', 'M19.4 13.5a7.8 7.8 0 0 0 0-3l2-1.5-2-3.5-2.4 1a8 8 0 0 0-2.6-1.5L14 2h-4l-.4 3a8 8 0 0 0-2.6 1.5l-2.4-1-2 3.5 2 1.5a7.8 7.8 0 0 0 0 3l-2 1.5 2 3.5 2.4-1a8 8 0 0 0 2.6 1.5l.4 3h4l.4-3a8 8 0 0 0 2.6-1.5l2.4 1 2-3.5-2-1.5ZM12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z'],
                 ];

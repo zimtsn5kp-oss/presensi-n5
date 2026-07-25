@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => 'Rekap Bulanan'])
+@extends('layouts.app', ['title' => 'Rekap Absensi'])
 
 @section('content')
 <form class="grid gap-4 rounded-3xl bg-white p-5 shadow-sm md:grid-cols-[1fr_1fr_180px_auto]">
@@ -27,21 +27,29 @@
 
 <section class="mt-6 overflow-hidden rounded-3xl bg-white shadow-sm">
     <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
-        <h2 class="font-bold text-emerald-950">Rekap: {{ $title }} - {{ $filters['classroom'] ?: 'Semua Kelas' }}</h2>
-        <div class="flex flex-wrap gap-3 text-xs font-semibold">
-            <span class="text-emerald-700">H Hadir</span>
-            <span class="text-amber-700">T Terlambat</span>
-            <span class="text-blue-700">I Izin</span>
-            <span class="text-orange-700">S Sakit</span>
-            <span class="text-red-700">A Alfa</span>
+        <div>
+            <h2 class="font-bold text-emerald-950">Rekap Absensi: {{ $title }} - {{ $filters['classroom'] ?: 'Semua Kelas' }}</h2>
+            <div class="mt-2 flex flex-wrap gap-3 text-xs font-semibold">
+                <span class="text-emerald-700">H Hadir</span>
+                <span class="text-amber-700">T Terlambat</span>
+                <span class="text-blue-700">I Izin</span>
+                <span class="text-orange-700">S Sakit</span>
+                <span class="text-red-700">A Alfa</span>
+            </div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('recaps.monthly.excel', request()->query()) }}" class="rounded-xl border border-emerald-200 px-4 py-2 text-sm font-semibold text-emerald-700">Excel</a>
+            <a href="{{ route('recaps.monthly.pdf', request()->query()) }}" class="rounded-xl border border-amber-200 px-4 py-2 text-sm font-semibold text-amber-700">PDF</a>
         </div>
     </div>
     <div class="overflow-x-auto">
         <table class="min-w-max border-collapse text-center text-sm">
             <thead>
                 <tr class="bg-slate-50 text-slate-600">
-                    <th rowspan="2" class="sticky left-0 z-10 w-14 border border-slate-200 bg-slate-50 px-3 py-3">No</th>
-                    <th rowspan="2" class="sticky left-14 z-10 min-w-56 border border-slate-200 bg-slate-50 px-3 py-3 text-left">Nama Murid</th>
+                    <th rowspan="2" class="border border-slate-200 bg-slate-50 px-3 py-3">No</th>
+                    <th rowspan="2" class="border border-slate-200 bg-slate-50 px-3 py-3">NISN</th>
+                    <th rowspan="2" class="min-w-56 border border-slate-200 bg-slate-50 px-3 py-3 text-left">Nama Murid</th>
+                    <th rowspan="2" class="border border-slate-200 bg-slate-50 px-3 py-3">Kelas</th>
                     <th colspan="{{ $dates->count() }}" class="border border-slate-200 px-3 py-2">Tanggal</th>
                     <th colspan="4" class="border border-slate-200 px-3 py-2">Hasil</th>
                 </tr>
@@ -58,11 +66,10 @@
             <tbody>
                 @forelse($rows as $index => $row)
                     <tr>
-                        <td class="sticky left-0 z-10 border border-slate-200 bg-white px-3 py-3">{{ $index + 1 }}</td>
-                        <td class="sticky left-14 z-10 border border-slate-200 bg-white px-3 py-3 text-left">
-                            <strong class="block text-slate-900">{{ $row['student']->name }}</strong>
-                            <span class="text-xs text-slate-500">NISN: {{ $row['student']->nisn }} | {{ $row['student']->classroom }}</span>
-                        </td>
+                        <td class="border border-slate-200 bg-white px-3 py-3">{{ $index + 1 }}</td>
+                        <td class="border border-slate-200 bg-white px-3 py-3">{{ $row['student']->nisn }}</td>
+                        <td class="border border-slate-200 bg-white px-3 py-3 text-left font-semibold text-slate-900">{{ $row['student']->name }}</td>
+                        <td class="border border-slate-200 bg-white px-3 py-3">{{ $row['student']->classroom }}</td>
                         @foreach($dates as $date)
                             @php($status = $row['days'][$date['key']])
                             <td title="{{ $date['holiday_name'] }}" class="border border-slate-200 px-2 py-3 font-bold {{ $date['is_weekend'] ? 'bg-red-50' : ($date['is_holiday'] ? 'bg-amber-50' : '') }}">
@@ -87,7 +94,7 @@
                         <td class="border border-slate-200 bg-red-50 px-2 py-3 font-bold text-red-700">{{ $row['summary']['alfa'] }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="{{ $dates->count() + 6 }}" class="px-4 py-10 text-center text-slate-500">Tidak ada murid pada kelas yang dipilih.</td></tr>
+                    <tr><td colspan="{{ $dates->count() + 8 }}" class="px-4 py-10 text-center text-slate-500">Tidak ada murid pada kelas yang dipilih.</td></tr>
                 @endforelse
             </tbody>
         </table>

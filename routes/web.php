@@ -39,6 +39,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/excel', [ReportController::class, 'excel'])->name('reports.excel');
         Route::get('reports/pdf', [ReportController::class, 'pdf'])->name('reports.pdf');
+        Route::get('recaps/monthly/excel', [MonthlyRecapController::class, 'excel'])->name('recaps.monthly.excel');
+        Route::get('recaps/monthly/pdf', [MonthlyRecapController::class, 'pdf'])->name('recaps.monthly.pdf');
         Route::get('recaps/monthly', MonthlyRecapController::class)->name('recaps.monthly');
     });
 
