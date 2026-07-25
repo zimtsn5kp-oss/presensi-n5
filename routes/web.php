@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\BackupController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DashboardDetailController;
 use App\Http\Controllers\Admin\HolidayController;
 use App\Http\Controllers\Admin\MonthlyRecapController;
 use App\Http\Controllers\Admin\ReportController;
@@ -25,6 +26,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 
     Route::middleware('role:administrator,guru')->group(function () {
+        Route::get('dashboard/details/{detail}', DashboardDetailController::class)->name('dashboard.details');
+
         Route::get('students', [StudentController::class, 'index'])->name('students.index');
         Route::get('students/data', [StudentController::class, 'data'])->name('students.data');
 
