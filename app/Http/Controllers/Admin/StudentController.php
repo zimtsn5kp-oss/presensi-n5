@@ -56,7 +56,7 @@ class StudentController extends Controller
         $student = Student::create($data + ['is_active' => $request->boolean('is_active', true)]);
         $logger->record('student.created', $student);
 
-        return redirect()->route('students.index')->with('success', 'Data siswa berhasil ditambahkan.');
+        return redirect()->route('students.index')->with('success', 'Data murid berhasil ditambahkan.');
     }
 
     public function edit(Student $student)
@@ -74,7 +74,7 @@ class StudentController extends Controller
         $student->update($data + ['is_active' => $request->boolean('is_active')]);
         $logger->record('student.updated', $student);
 
-        return redirect()->route('students.index')->with('success', 'Data siswa berhasil diperbarui.');
+        return redirect()->route('students.index')->with('success', 'Data murid berhasil diperbarui.');
     }
 
     public function destroy(Student $student, ActivityLogger $logger)
@@ -82,18 +82,18 @@ class StudentController extends Controller
         $logger->record('student.deleted', $student);
         $student->delete();
 
-        return back()->with('success', 'Data siswa dihapus.');
+        return back()->with('success', 'Data murid dihapus.');
     }
 
     public function exportExcel()
     {
-        return Excel::download(new StudentsExport(), 'data-siswa.xlsx');
+        return Excel::download(new StudentsExport(), 'data-murid.xlsx');
     }
 
     public function exportPdf()
     {
         return Pdf::loadView('exports.students', ['students' => Student::orderBy('classroom')->orderBy('name')->get()])
-            ->download('data-siswa.pdf');
+            ->download('data-murid.pdf');
     }
 
     public function import(Request $request)
@@ -110,12 +110,12 @@ class StudentController extends Controller
 
         return redirect()
             ->route('students.index')
-            ->with('success', "{$import->created} siswa baru ditambahkan, {$import->updated} siswa diperbarui.");
+            ->with('success', "{$import->created} murid baru ditambahkan, {$import->updated} murid diperbarui.");
     }
 
     public function importTemplate()
     {
-        return Excel::download(new StudentImportTemplateExport(), 'format-import-siswa.xlsx');
+        return Excel::download(new StudentImportTemplateExport(), 'format-import-murid.xlsx');
     }
 
     private function classrooms(): array

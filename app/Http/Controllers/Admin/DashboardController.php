@@ -105,9 +105,9 @@ class DashboardController extends Controller
     private function detailTitle(?string $detail): ?string
     {
         return match ($detail) {
-            'late' => 'Siswa Terlambat Hari Ini',
-            'absent' => 'Siswa Tidak Hadir Hari Ini',
-            'not_checked_in' => 'Siswa Belum Absen Hari Ini',
+            'late' => 'Murid Terlambat Hari Ini',
+            'absent' => 'Murid Tidak Hadir Hari Ini',
+            'not_checked_in' => 'Murid Belum Absen Hari Ini',
             default => null,
         };
     }

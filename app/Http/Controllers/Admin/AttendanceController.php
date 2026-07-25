@@ -31,7 +31,7 @@ class AttendanceController extends Controller
         $owner = $this->resolveBarcodeOwner($data['barcode']);
 
         if (! $owner) {
-            return $this->barcodeResponse($request, false, 'Barcode tidak ditemukan pada data siswa.');
+            return $this->barcodeResponse($request, false, 'Barcode tidak ditemukan pada data murid.');
         }
 
         if (! $owner->is_active) {
@@ -137,7 +137,7 @@ class AttendanceController extends Controller
     private function resolveBarcodeOwner(string $barcode): ?Student
     {
         $code = trim($barcode);
-        $typedCode = preg_replace('/^(student|siswa|s):/i', '', $code);
+        $typedCode = preg_replace('/^(student|murid|s|m):/i', '', $code);
 
         return $this->findStudentByCode($typedCode);
     }

@@ -1,8 +1,8 @@
-@extends('layouts.app', ['title' => 'Manajemen Siswa'])
+@extends('layouts.app', ['title' => 'Manajemen Murid'])
 @section('content')
 <div class="rounded-3xl bg-white p-6 shadow-sm">
     <div class="flex flex-wrap items-center justify-between gap-3">
-        <div><h2 class="text-lg font-bold text-emerald-950">Data Siswa</h2><p class="text-sm text-slate-500">Daftar siswa aktif dan nonaktif.</p></div>
+        <div><h2 class="text-lg font-bold text-emerald-950">Data Murid</h2><p class="text-sm text-slate-500">Daftar murid aktif dan nonaktif.</p></div>
         @if(auth()->user()->hasRole('administrator'))
         <div class="flex gap-2">
             <a href="{{ route('students.export.excel') }}" class="rounded-xl border border-emerald-200 px-4 py-2 text-sm font-semibold text-emerald-700">Excel</a>

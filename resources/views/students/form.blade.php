@@ -1,4 +1,4 @@
-@extends('layouts.app', ['title' => $student->exists ? 'Edit Siswa' : 'Tambah Siswa'])
+@extends('layouts.app', ['title' => $student->exists ? 'Edit Murid' : 'Tambah Murid'])
 @section('content')
 <form method="post" action="{{ $student->exists ? route('students.update', $student) : route('students.store') }}" class="max-w-4xl rounded-3xl bg-white p-6 shadow-sm">
     @csrf @if($student->exists) @method('PUT') @endif
@@ -19,7 +19,7 @@
     <section class="mt-6 max-w-4xl rounded-3xl bg-white p-6 shadow-sm">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
-                <h2 class="text-lg font-bold text-emerald-950">Import Siswa dari Excel</h2>
+                <h2 class="text-lg font-bold text-emerald-950">Import Murid dari Excel</h2>
                 <p class="text-sm text-slate-500">Format kolom: nisn, nama, kelas, jk, aktif. Kelas: 7A sampai 9C. JK: L atau P. Aktif: 1/0.</p>
             </div>
             <a href="{{ route('students.import.template') }}" class="rounded-xl border border-emerald-200 px-4 py-2 text-sm font-semibold text-emerald-700">Unduh Format</a>

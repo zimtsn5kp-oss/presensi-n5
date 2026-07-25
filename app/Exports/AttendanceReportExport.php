@@ -36,6 +36,6 @@ class AttendanceReportExport implements FromCollection, WithHeadings
 
     public function headings(): array
     {
-        return ['Tanggal', 'Nama Siswa', 'Masuk', 'Pulang', 'Status', 'Terlambat Menit', 'Sumber'];
+        return ['Tanggal', 'Nama Murid', 'Masuk', 'Pulang', 'Status', 'Terlambat Menit', 'Sumber'];
     }
 }

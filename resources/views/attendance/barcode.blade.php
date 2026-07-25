@@ -6,7 +6,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <h2 class="text-lg font-bold text-emerald-950">Scanner Absensi</h2>
-                <p class="text-sm text-slate-500">Gunakan webcam atau scanner USB. Barcode siswa menggunakan NISN.</p>
+                <p class="text-sm text-slate-500">Gunakan webcam atau scanner USB. Barcode murid menggunakan NISN.</p>
             </div>
             <span id="scannerState" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">Siap</span>
         </div>

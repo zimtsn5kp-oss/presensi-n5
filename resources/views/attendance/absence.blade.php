@@ -4,11 +4,11 @@
     <div class="grid gap-5 md:grid-cols-2">
         <div>
             @php($selectedStudent = old('attendable_id') ? $students->firstWhere('id', (int) old('attendable_id')) : null)
-            <label class="text-sm font-semibold">Nama Siswa / NISN / Kelas</label>
+            <label class="text-sm font-semibold">Nama Murid / NISN / Kelas</label>
             <div id="studentCombobox" class="relative mt-2">
                 <input id="studentId" type="hidden" name="attendable_id" value="{{ $selectedStudent?->id }}">
                 <button id="studentComboboxButton" type="button" aria-haspopup="listbox" aria-expanded="false" class="flex w-full items-center justify-between gap-3 rounded-2xl border bg-white px-4 py-3 text-left">
-                    <span id="selectedStudentLabel">{{ $selectedStudent ? $selectedStudent->name.' - '.$selectedStudent->classroom : 'Pilih siswa' }}</span>
+                    <span id="selectedStudentLabel">{{ $selectedStudent ? $selectedStudent->name.' - '.$selectedStudent->classroom : 'Pilih murid' }}</span>
                     <span class="text-slate-400">&#9662;</span>
                 </button>
                 <div id="studentDropdown" class="absolute z-30 mt-2 hidden w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
@@ -22,7 +22,7 @@
                                 <span class="text-xs text-slate-500">NISN: {{ $student->nisn }} | Kelas {{ $student->classroom }}</span>
                             </button>
                         @endforeach
-                        <p id="studentSearchEmpty" class="hidden px-3 py-6 text-center text-sm text-slate-500">Siswa tidak ditemukan.</p>
+                        <p id="studentSearchEmpty" class="hidden px-3 py-6 text-center text-sm text-slate-500">Murid tidak ditemukan.</p>
                     </div>
                 </div>
             </div>

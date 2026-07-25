@@ -13,7 +13,7 @@
         <div class="text-center">
             <img src="{{ asset('images/logo-mts.png') }}" alt="Logo MTs Negeri 5 Kulon Progo" class="mx-auto h-28 w-28 object-contain">
             <p class="mt-4 text-sm font-bold uppercase tracking-[.25em] text-emerald-700">Prisma</p>
-            <h1 class="mt-2 text-2xl font-black text-emerald-950">Presensi Siswa MTs Negeri 5 Kulon Progo</h1>
+            <h1 class="mt-2 text-2xl font-black text-emerald-950">Presensi Murid MTs Negeri 5 Kulon Progo</h1>
         </div>
         <label class="mt-8 block text-sm font-semibold">Username</label>
         <input name="username" value="{{ old('username') }}" autocomplete="username" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 focus:border-emerald-500 focus:outline-none">

@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
         $teacherRole = Role::firstOrCreate(['name' => 'guru'], ['display_name' => 'Guru']);
 
         collect([
-            ['students.manage', 'Kelola siswa', 'master'],
+            ['students.manage', 'Kelola murid', 'master'],
             ['teachers.manage', 'Kelola guru', 'master'],
             ['attendance.absence', 'Input ketidakhadiran', 'attendance'],
             ['reports.view', 'Lihat laporan', 'reports'],

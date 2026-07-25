@@ -41,7 +41,7 @@
             <thead>
                 <tr class="bg-slate-50 text-slate-600">
                     <th rowspan="2" class="sticky left-0 z-10 w-14 border border-slate-200 bg-slate-50 px-3 py-3">No</th>
-                    <th rowspan="2" class="sticky left-14 z-10 min-w-56 border border-slate-200 bg-slate-50 px-3 py-3 text-left">Nama Siswa</th>
+                    <th rowspan="2" class="sticky left-14 z-10 min-w-56 border border-slate-200 bg-slate-50 px-3 py-3 text-left">Nama Murid</th>
                     <th colspan="{{ $dates->count() }}" class="border border-slate-200 px-3 py-2">Tanggal</th>
                     <th colspan="4" class="border border-slate-200 px-3 py-2">Hasil</th>
                 </tr>
@@ -87,7 +87,7 @@
                         <td class="border border-slate-200 bg-red-50 px-2 py-3 font-bold text-red-700">{{ $row['summary']['alfa'] }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="{{ $dates->count() + 6 }}" class="px-4 py-10 text-center text-slate-500">Tidak ada siswa pada kelas yang dipilih.</td></tr>
+                    <tr><td colspan="{{ $dates->count() + 6 }}" class="px-4 py-10 text-center text-slate-500">Tidak ada murid pada kelas yang dipilih.</td></tr>
                 @endforelse
             </tbody>
         </table>
