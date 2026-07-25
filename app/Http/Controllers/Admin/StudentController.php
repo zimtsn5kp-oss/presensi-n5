@@ -25,9 +25,17 @@ class StudentController extends Controller
 
     public function data(Request $request)
     {
+        if (! $request->boolean('load')) {
+            return DataTables::of(collect())->make();
+        }
+
         $query = Student::query()
             ->select('students.*')
             ->when($request->filled('classroom'), fn ($query) => $query->where('classroom', $request->string('classroom')));
+
+        $request->filled('classroom')
+            ? $query->orderBy('name')
+            : $query->orderBy('classroom')->orderBy('name');
 
         $table = DataTables::of($query)
             ->addColumn('status_badge', fn ($student) => view('partials.status', ['active' => $student->is_active])->render())

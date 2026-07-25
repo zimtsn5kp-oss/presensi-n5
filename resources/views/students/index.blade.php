@@ -11,7 +11,7 @@
         </div>
         @endif
     </div>
-    <div class="mt-6 grid gap-3 md:grid-cols-2">
+    <div class="mt-6 grid gap-3 md:grid-cols-[1fr_auto_auto] md:items-end">
         <label class="text-sm font-semibold text-emerald-950">Kelas
             <select id="classroomFilter" class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3">
                 <option value="">Semua kelas</option>
@@ -20,28 +20,66 @@
                 @endforeach
             </select>
         </label>
-        <div class="flex items-end">
-            <button type="button" id="resetStudentFilters" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600">Reset Filter</button>
-        </div>
+        <button type="button" id="showStudentData" class="w-full rounded-2xl bg-emerald-900 px-5 py-3 text-sm font-semibold text-white shadow hover:bg-emerald-800 md:w-auto">Tampilkan</button>
+        <button type="button" id="resetStudentFilters" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600 md:w-auto">Reset Filter</button>
     </div>
-    <div class="mt-6 overflow-x-auto"><table id="studentsTable" class="w-full text-sm"><thead><tr><th>NISN</th><th>Nama</th><th>Kelas</th><th>JK</th><th>Status</th>@if(auth()->user()->hasRole('administrator'))<th>Aksi</th>@endif</tr></thead></table></div>
+    <p id="studentTableHint" class="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-3 text-sm text-slate-600">Pilih filter kelas lalu klik Tampilkan untuk memuat data murid.</p>
+    <div class="mt-6 overflow-x-auto"><table id="studentsTable" class="min-w-[720px] w-full text-sm"><thead><tr><th>NISN</th><th>Nama</th><th>Kelas</th><th>JK</th><th>Status</th>@if(auth()->user()->hasRole('administrator'))<th>Aksi</th>@endif</tr></thead><tbody></tbody></table></div>
 </div>
 @endsection
 @push('scripts')
 <script>
-const studentsTable = new DataTable('#studentsTable',{processing:true,serverSide:true,ajax:{
-    url: '{{ route('students.data') }}',
-    data: function (data) {
-        data.classroom = document.getElementById('classroomFilter').value;
+let studentsTable = null;
+const studentTableHint = document.getElementById('studentTableHint');
+const studentsTableElement = document.getElementById('studentsTable');
+
+function initStudentsTable() {
+    studentTableHint.classList.add('hidden');
+
+    if (studentsTable) {
+        studentsTable.ajax.reload();
+        return;
     }
-},columns:[
- {data:'nisn'},{data:'name'},{data:'classroom'},{data:'gender'},{data:'status_badge',orderable:false,searchable:false}
- @if(auth()->user()->hasRole('administrator')),{data:'actions',orderable:false,searchable:false}@endif
-]});
-document.getElementById('classroomFilter').addEventListener('change', () => studentsTable.ajax.reload());
+
+    studentsTable = new DataTable('#studentsTable', {
+        processing: true,
+        serverSide: true,
+        ordering: false,
+        ajax: {
+            url: '{{ route('students.data') }}',
+            data: function (data) {
+                data.load = 1;
+                data.classroom = document.getElementById('classroomFilter').value;
+            }
+        },
+        columns: [
+            {data: 'nisn'},
+            {data: 'name'},
+            {data: 'classroom'},
+            {data: 'gender'},
+            {data: 'status_badge', orderable: false, searchable: false}
+            @if(auth()->user()->hasRole('administrator')),{data: 'actions', orderable: false, searchable: false}@endif
+        ],
+        language: {
+            emptyTable: 'Tidak ada data murid pada filter yang dipilih.'
+        }
+    });
+}
+
+document.getElementById('showStudentData').addEventListener('click', initStudentsTable);
+document.getElementById('classroomFilter').addEventListener('change', function () {
+    if (studentsTable) {
+        initStudentsTable();
+    }
+});
 document.getElementById('resetStudentFilters').addEventListener('click', function () {
     document.getElementById('classroomFilter').value = '';
-    studentsTable.ajax.reload();
+    if (studentsTable) {
+        studentsTable.destroy();
+        studentsTable = null;
+        studentsTableElement.querySelector('tbody').innerHTML = '';
+    }
+    studentTableHint.classList.remove('hidden');
 });
 </script>
 @endpush

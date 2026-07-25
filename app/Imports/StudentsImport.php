@@ -19,20 +19,32 @@ class StudentsImport implements ToCollection, WithHeadingRow
     {
         $rows = $rows
             ->filter(fn ($row) => filled($row['nisn'] ?? null) || filled($row['nama'] ?? null))
+            ->map(fn ($row) => [
+                'nisn' => $this->textValue($row['nisn'] ?? null),
+                'nama' => trim((string) ($row['nama'] ?? '')),
+                'kelas' => strtoupper(trim((string) ($row['kelas'] ?? ''))),
+                'jk' => strtoupper(trim((string) ($row['jk'] ?? ''))),
+                'aktif' => filled($row['aktif'] ?? null) ? strtolower(trim((string) $row['aktif'])) : '1',
+            ])
             ->values();
 
         Validator::make($rows->toArray(), [
-            '*.nisn' => ['required', 'string', 'max:30', 'distinct'],
-            '*.nama' => ['required', 'string', 'max:150'],
+            '*.nisn' => ['required', 'max:30', 'distinct'],
+            '*.nama' => ['required', 'max:150'],
             '*.kelas' => ['required', Rule::in(['7A', '7B', '7C', '8A', '8B', '8C', '9A', '9B', '9C'])],
             '*.jk' => ['required', Rule::in(['L', 'P'])],
-            '*.aktif' => ['nullable', Rule::in(['1', 1, '0', 0, 'ya', 'tidak', 'aktif', 'nonaktif'])],
+            '*.aktif' => ['nullable', Rule::in(['1', '0', 'ya', 'tidak', 'aktif', 'nonaktif'])],
         ], [
             '*.nisn.required' => 'Kolom nisn wajib diisi.',
+            '*.nisn.max' => 'Kolom nisn maksimal 30 karakter.',
             '*.nisn.distinct' => 'NISN tidak boleh duplikat di file import.',
             '*.nama.required' => 'Kolom nama wajib diisi.',
+            '*.nama.max' => 'Kolom nama maksimal 150 karakter.',
             '*.kelas.in' => 'Kolom kelas harus salah satu dari 7A, 7B, 7C, 8A, 8B, 8C, 9A, 9B, atau 9C.',
+            '*.kelas.required' => 'Kolom kelas wajib diisi.',
             '*.jk.in' => 'Kolom jk harus L atau P.',
+            '*.jk.required' => 'Kolom jk wajib diisi.',
+            '*.aktif.in' => 'Kolom aktif harus 1, 0, ya, tidak, aktif, atau nonaktif.',
         ])->validate();
 
         foreach ($rows as $row) {
@@ -58,5 +70,14 @@ class StudentsImport implements ToCollection, WithHeadingRow
     private function activeValue(mixed $value): bool
     {
         return in_array(strtolower(trim((string) $value)), ['1', 'ya', 'aktif'], true);
+    }
+
+    private function textValue(mixed $value): string
+    {
+        if (is_int($value) || is_float($value)) {
+            return number_format($value, 0, '', '');
+        }
+
+        return trim((string) $value);
     }
 }
