@@ -20,13 +20,13 @@
     </style>
 </head>
 <body class="login-bg min-h-screen">
-<main class="flex min-h-screen items-center justify-center p-6">
+<main class="flex min-h-screen items-center justify-center p-4 sm:p-6">
     <section class="w-full max-w-sm overflow-hidden rounded-[1.5rem] border border-white/30 bg-white shadow-2xl shadow-emerald-950/40">
-        <div class="border-b border-emerald-100 bg-emerald-50/70 px-6 py-5 text-center">
-            <img src="{{ asset('images/logo-prisma-transparent.png') }}" alt="Logo Prisma" class="mx-auto h-36 w-36 object-contain">
+        <div class="border-b border-emerald-100 bg-emerald-50/70 px-5 py-4 text-center sm:px-6 sm:py-5">
+            <img src="{{ asset('images/logo-prisma-transparent.png') }}" alt="Logo Prisma" class="mx-auto h-32 w-32 object-contain sm:h-36 sm:w-36">
         </div>
 
-        <form method="post" action="{{ route('login.store') }}" class="p-6">
+        <form method="post" action="{{ route('login.store') }}" class="p-5 sm:p-6">
             @csrf
             <label class="block text-sm font-semibold text-emerald-950">Username</label>
             <div class="mt-2 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 focus-within:border-emerald-500 focus-within:bg-white">

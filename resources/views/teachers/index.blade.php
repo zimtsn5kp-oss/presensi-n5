@@ -1,6 +1,6 @@
 @extends('layouts.app', ['title' => 'Manajemen Guru'])
 @section('content')
-<div class="rounded-3xl bg-white p-6 shadow-sm">
+<div class="rounded-2xl bg-white p-4 shadow-sm sm:p-6">
     <div class="flex flex-wrap items-center justify-between gap-3">
         <div><h2 class="text-lg font-bold text-emerald-950">Data Guru</h2><p class="text-sm text-slate-500">NIP, nama, mapel, dan status aktif.</p></div>
         <div class="flex gap-2"><a href="{{ route('teachers.export.excel') }}" class="rounded-xl border border-emerald-200 px-4 py-2 text-sm font-semibold text-emerald-700">Excel</a><a href="{{ route('teachers.export.pdf') }}" class="rounded-xl border border-amber-200 px-4 py-2 text-sm font-semibold text-amber-700">PDF</a><a href="{{ route('teachers.create') }}" class="rounded-xl bg-emerald-900 px-4 py-2 text-sm font-semibold text-white">Tambah</a></div>

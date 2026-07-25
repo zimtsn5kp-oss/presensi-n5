@@ -1,7 +1,7 @@
 @extends('layouts.app', ['title' => 'Rekap Absensi'])
 
 @section('content')
-<form class="grid gap-4 rounded-3xl bg-white p-5 shadow-sm md:grid-cols-[1fr_1fr_180px_auto]">
+<form class="grid gap-4 rounded-2xl bg-white p-4 shadow-sm sm:p-5 md:grid-cols-[1fr_1fr_180px_auto]">
     <label class="text-sm font-semibold text-emerald-950">Pilih Kelas
         <select name="classroom" class="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3">
             <option value="">Semua Kelas</option>
@@ -26,12 +26,12 @@
 </form>
 
 @unless($hasResult)
-    <section class="mt-6 rounded-3xl border border-emerald-100 bg-emerald-50/70 p-6 text-center shadow-sm">
+    <section class="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-center shadow-sm sm:p-6">
         <h2 class="text-lg font-bold text-emerald-950">Pilih Filter Rekap Absensi</h2>
         <p class="mt-2 text-sm text-slate-600">Pilih kelas, bulan, dan tahun lalu klik Tampilkan untuk memuat data rekap.</p>
     </section>
 @else
-<section class="mt-6 overflow-hidden rounded-3xl bg-white shadow-sm">
+<section class="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm">
     <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
         <div>
             <h2 class="font-bold text-emerald-950">Rekap Absensi: {{ $title }} - {{ $filters['classroom'] ?: 'Semua Kelas' }}</h2>

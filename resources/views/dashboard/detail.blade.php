@@ -1,7 +1,7 @@
 @extends('layouts.app', ['title' => $title])
 
 @section('content')
-<section class="rounded-3xl bg-white p-6 shadow-sm">
+<section class="rounded-2xl bg-white p-4 shadow-sm sm:p-6">
     <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
             <h2 class="text-lg font-bold text-emerald-950">{{ $title }}</h2>
@@ -11,7 +11,7 @@
     </div>
 
     <div class="mt-6 overflow-x-auto">
-        <table class="w-full text-left text-sm">
+        <table class="min-w-[680px] w-full text-left text-sm">
             <thead>
                 <tr class="border-b text-emerald-800">
                     <th class="py-3">NISN</th>

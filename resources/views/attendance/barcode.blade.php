@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="grid gap-6 xl:grid-cols-[1.2fr_.8fr]">
-    <section class="rounded-3xl bg-white p-6 shadow-sm">
+    <section class="rounded-2xl bg-white p-4 shadow-sm sm:p-6">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <h2 class="text-lg font-bold text-emerald-950">Scanner Absensi</h2>
@@ -11,8 +11,8 @@
             <span id="scannerState" class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">Siap</span>
         </div>
 
-        <div class="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-slate-950">
-            <div id="cameraPreview" class="min-h-[360px] w-full bg-slate-950"></div>
+        <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-slate-950">
+            <div id="cameraPreview" class="min-h-[240px] w-full bg-slate-950 sm:min-h-[360px]"></div>
         </div>
 
         <div class="mt-4 flex flex-wrap gap-3">
@@ -20,7 +20,7 @@
             <button type="button" id="stopCamera" class="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700">Matikan</button>
         </div>
 
-        <form id="barcodeForm" method="post" action="{{ route('attendance.barcode.store') }}" class="mt-6 rounded-3xl border border-emerald-100 bg-emerald-50/60 p-4">
+        <form id="barcodeForm" method="post" action="{{ route('attendance.barcode.store') }}" class="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
             @csrf
             <div class="grid gap-4 md:grid-cols-[1fr_220px]">
                 <label class="text-sm font-semibold text-emerald-950">Input scanner USB / kode manual
@@ -34,11 +34,11 @@
                     </select>
                 </label>
             </div>
-            <button class="mt-4 rounded-2xl bg-emerald-900 px-5 py-3 text-sm font-bold text-white shadow hover:bg-emerald-800">Simpan Scan</button>
+            <button class="mt-4 w-full rounded-2xl bg-emerald-900 px-5 py-3 text-sm font-bold text-white shadow hover:bg-emerald-800 sm:w-auto">Simpan Scan</button>
         </form>
     </section>
 
-    <aside class="rounded-3xl bg-white p-6 shadow-sm">
+    <aside class="rounded-2xl bg-white p-4 shadow-sm sm:p-6">
         <h2 class="font-bold text-emerald-950">Hasil Terakhir</h2>
         <div id="scanResult" class="mt-5 rounded-3xl border border-slate-100 bg-slate-50 p-5">
             <p class="text-sm text-slate-500">Belum ada scan.</p>

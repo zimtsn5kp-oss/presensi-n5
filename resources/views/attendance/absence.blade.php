@@ -1,6 +1,6 @@
 @extends('layouts.app', ['title' => 'Input Ketidakhadiran'])
 @section('content')
-<form method="post" action="{{ route('attendance.absence.store') }}" class="max-w-3xl rounded-3xl bg-white p-6 shadow-sm">@csrf
+<form method="post" action="{{ route('attendance.absence.store') }}" class="max-w-3xl rounded-2xl bg-white p-4 shadow-sm sm:p-6">@csrf
     <div class="grid gap-5 md:grid-cols-2">
         <div>
             @php($selectedStudent = old('attendable_id') ? $students->firstWhere('id', (int) old('attendable_id')) : null)
@@ -31,7 +31,7 @@
         <label class="text-sm font-semibold">Status<select name="type" class="mt-2 w-full rounded-2xl border px-4 py-3"><option value="izin">Izin</option><option value="sakit">Sakit</option><option value="alfa">Alfa</option></select></label>
         <label class="md:col-span-2 text-sm font-semibold">Keterangan<textarea name="description" rows="4" class="mt-2 w-full rounded-2xl border px-4 py-3"></textarea></label>
     </div>
-    <button class="mt-6 rounded-xl bg-emerald-900 px-5 py-3 font-semibold text-white">Simpan Ketidakhadiran</button>
+    <button class="mt-6 w-full rounded-xl bg-emerald-900 px-5 py-3 font-semibold text-white sm:w-auto">Simpan Ketidakhadiran</button>
 </form>
 @endsection
 

@@ -6,7 +6,7 @@
         <div class="grid gap-4 p-5 lg:grid-cols-[1fr_280px] lg:p-6">
             <div>
                 <p class="text-xs font-semibold uppercase tracking-[.22em] text-emerald-200">Prisma</p>
-                <h2 class="mt-2 text-2xl font-black leading-tight">Dashboard Presensi Murid</h2>
+                <h2 class="mt-2 text-xl font-black leading-tight sm:text-2xl">Dashboard Presensi Murid</h2>
                 <p class="mt-2 max-w-2xl text-sm leading-5 text-emerald-100">
                     Pantau ringkasan presensi hari ini, status setiap kelas, dan murid yang perlu ditindaklanjuti.
                 </p>
@@ -14,7 +14,7 @@
             <div class="rounded-2xl bg-white/10 p-4 ring-1 ring-white/15">
                 <p id="clockDay" class="text-xs font-semibold uppercase tracking-[.18em] text-emerald-200">{{ now()->isoFormat('dddd') }}</p>
                 <p id="clockDate" class="mt-1 text-lg font-bold">{{ now()->isoFormat('D MMMM YYYY') }}</p>
-                <p id="clockTime" class="mt-3 text-4xl font-black tabular-nums">{{ now()->format('H:i:s') }}</p>
+                <p id="clockTime" class="mt-3 text-3xl font-black tabular-nums sm:text-4xl">{{ now()->format('H:i:s') }}</p>
             </div>
         </div>
     </section>
@@ -46,27 +46,27 @@
         @endforeach
     </div>
 
-    <section class="rounded-3xl bg-white p-6 shadow-sm">
+    <section class="rounded-2xl bg-white p-4 shadow-sm sm:p-6">
         <div class="flex flex-wrap items-center justify-between gap-4">
             <div>
                 <h2 class="text-lg font-bold text-emerald-950">Kehadiran Hari Ini</h2>
                 <p class="text-sm text-slate-500">{{ $metrics['student_present'] }} dari {{ $metrics['total_students'] }} murid sudah tercatat hadir.</p>
             </div>
-            <p class="text-4xl font-black text-emerald-950">{{ $attendancePercentage }}%</p>
+            <p class="text-3xl font-black text-emerald-950 sm:text-4xl">{{ $attendancePercentage }}%</p>
         </div>
         <div class="mt-5 h-4 overflow-hidden rounded-full bg-slate-100">
             <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-amber-300" style="width: {{ min($attendancePercentage, 100) }}%"></div>
         </div>
     </section>
 
-    <section class="rounded-3xl bg-white p-6 shadow-sm">
+    <section class="rounded-2xl bg-white p-4 shadow-sm sm:p-6">
         <div class="flex flex-wrap items-end justify-between gap-4">
             <div>
                 <h2 class="text-lg font-bold text-emerald-950">Status Presensi</h2>
                 <p class="text-sm text-slate-500">Ringkasan presensi hari ini berdasarkan kelas.</p>
             </div>
-            <form class="flex w-full items-end gap-3 sm:w-auto">
-                <label class="min-w-56 flex-1 text-sm font-semibold text-emerald-950">Filter Kelas
+            <form class="grid w-full gap-3 sm:w-auto sm:grid-cols-[14rem_auto] sm:items-end">
+                <label class="text-sm font-semibold text-emerald-950">Filter Kelas
                     <select name="classroom" class="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3">
                         <option value="">Semua Kelas</option>
                         @foreach($classrooms as $classroom)
@@ -79,7 +79,7 @@
         </div>
 
         <div class="mt-6 overflow-x-auto">
-            <table class="w-full text-left text-sm">
+            <table class="min-w-[680px] w-full text-left text-sm">
                 <thead>
                     <tr class="border-b border-slate-200 text-emerald-800">
                         <th class="py-3">Kelas</th>

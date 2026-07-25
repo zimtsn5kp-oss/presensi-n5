@@ -17,7 +17,7 @@
     <style>
         [x-cloak]{display:none} body{font-family:'Inter',ui-sans-serif,system-ui,sans-serif} .dt-input{border:1px solid #d1d5db;border-radius:.75rem;padding:.45rem .7rem}
         table.dataTable thead th{color:#065f46}
-        #appSidebar{width:18rem;transition:width .2s ease,transform .2s ease}
+        #appSidebar{width:min(18rem,calc(100vw - 2rem));transition:width .2s ease,transform .2s ease}
         #appMain{transition:padding-left .2s ease}
         #sidebarOverlay{display:none}
         @media (max-width:1023px){
@@ -80,23 +80,23 @@
         </nav>
     </aside>
     <main id="appMain" class="min-w-0">
-        <header class="sticky top-0 z-20 border-b border-emerald-100 bg-white/90 px-5 py-4 backdrop-blur">
-            <div class="flex items-center justify-between gap-4">
+        <header class="sticky top-0 z-20 border-b border-emerald-100 bg-white/90 px-4 py-3 backdrop-blur sm:px-5 sm:py-4">
+            <div class="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
                 <div class="flex min-w-0 items-center gap-3">
                     <button id="sidebarToggle" type="button" title="Buka atau tutup sidebar" aria-label="Buka atau tutup sidebar" aria-expanded="true" class="grid h-11 w-11 flex-none place-items-center rounded-xl border border-slate-200 text-emerald-950 hover:bg-emerald-50">
                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
                     </button>
                     <div class="min-w-0">
-                        <p class="text-xs uppercase tracking-[.2em] text-emerald-700">Madrasah SaaS</p>
-                        <h1 class="truncate text-xl font-bold text-emerald-950">{{ $title ?? 'Dashboard' }}</h1>
+                        <p class="text-[10px] uppercase tracking-[.18em] text-emerald-700 sm:text-xs sm:tracking-[.2em]">Madrasah SaaS</p>
+                        <h1 class="truncate text-lg font-bold text-emerald-950 sm:text-xl">{{ $title ?? 'Dashboard' }}</h1>
                     </div>
                 </div>
-                <form method="post" action="{{ route('logout') }}">@csrf
-                    <button class="rounded-xl bg-emerald-900 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-800">Keluar</button>
+                <form method="post" action="{{ route('logout') }}" class="ml-auto">@csrf
+                    <button class="rounded-xl bg-emerald-900 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-800 sm:px-4">Keluar</button>
                 </form>
             </div>
         </header>
-        <section class="p-5 lg:p-8">
+        <section class="p-4 sm:p-5 lg:p-8">
             @if(session('success') || session('error'))
                 <div class="mb-5 rounded-2xl border {{ session('error') ? 'border-red-200 bg-red-50 text-red-700' : 'border-emerald-200 bg-emerald-50 text-emerald-800' }} px-4 py-3 text-sm shadow-sm">
                     {{ session('success') ?? session('error') }}

@@ -1,6 +1,6 @@
 @extends('layouts.app', ['title' => 'Manajemen Murid'])
 @section('content')
-<div class="rounded-3xl bg-white p-6 shadow-sm">
+<div class="rounded-2xl bg-white p-4 shadow-sm sm:p-6">
     <div class="flex flex-wrap items-center justify-between gap-3">
         <div><h2 class="text-lg font-bold text-emerald-950">Data Murid</h2><p class="text-sm text-slate-500">Daftar murid aktif dan nonaktif.</p></div>
         @if(auth()->user()->hasRole('administrator'))
