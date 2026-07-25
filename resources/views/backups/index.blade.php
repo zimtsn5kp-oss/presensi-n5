@@ -2,7 +2,7 @@
 @section('content')
 <section class="rounded-3xl bg-white p-6 shadow-sm">
     <div class="flex flex-wrap items-center justify-between gap-3">
-        <div><h2 class="font-bold text-emerald-950">Riwayat Backup</h2><p class="text-sm text-slate-500">Backup manual dan jadwal backup otomatis dapat dihubungkan ke scheduler Laravel.</p></div>
+        <div><h2 class="font-bold text-emerald-950">Riwayat Backup</h2></div>
         <form method="post" action="{{ route('backups.store') }}">@csrf<button class="rounded-xl bg-emerald-900 px-5 py-3 font-semibold text-white">Backup Manual</button></form>
     </div>
     <div class="mt-6 overflow-x-auto"><table class="w-full text-left text-sm"><thead><tr class="text-emerald-800"><th class="py-3">Waktu</th><th>File</th><th>Ukuran</th><th>Tipe</th><th>Aksi</th></tr></thead><tbody>

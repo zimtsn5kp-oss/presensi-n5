@@ -25,6 +25,12 @@
     </div>
 </form>
 
+@unless($hasResult)
+    <section class="mt-6 rounded-3xl border border-emerald-100 bg-emerald-50/70 p-6 text-center shadow-sm">
+        <h2 class="text-lg font-bold text-emerald-950">Pilih Filter Rekap Absensi</h2>
+        <p class="mt-2 text-sm text-slate-600">Pilih kelas, bulan, dan tahun lalu klik Tampilkan untuk memuat data rekap.</p>
+    </section>
+@else
 <section class="mt-6 overflow-hidden rounded-3xl bg-white shadow-sm">
     <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
         <div>
@@ -100,4 +106,5 @@
         </table>
     </div>
 </section>
+@endunless
 @endsection

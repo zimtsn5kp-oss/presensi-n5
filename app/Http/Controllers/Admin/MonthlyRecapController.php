@@ -17,11 +17,15 @@ class MonthlyRecapController extends Controller
 {
     public function __invoke(Request $request, SchoolCalendar $calendar)
     {
-        return view('recaps.monthly', $this->recapData($request, $calendar));
+        return view('recaps.monthly', $this->recapData($request, $calendar, $this->hasSubmittedFilter($request)));
     }
 
     public function excel(Request $request, SchoolCalendar $calendar)
     {
+        if (! $this->hasSubmittedFilter($request)) {
+            return redirect()->route('recaps.monthly')->with('error', 'Pilih filter rekap terlebih dahulu.');
+        }
+
         $data = $this->recapData($request, $calendar);
         $classroom = $data['filters']['classroom'] ?: 'semua-kelas';
         $fileName = 'rekap-absensi-'.$data['filters']['year'].'-'.str_pad((string) $data['filters']['month'], 2, '0', STR_PAD_LEFT).'-'.$classroom.'.xlsx';
@@ -31,6 +35,10 @@ class MonthlyRecapController extends Controller
 
     public function pdf(Request $request, SchoolCalendar $calendar)
     {
+        if (! $this->hasSubmittedFilter($request)) {
+            return redirect()->route('recaps.monthly')->with('error', 'Pilih filter rekap terlebih dahulu.');
+        }
+
         $data = $this->recapData($request, $calendar);
         $classroom = $data['filters']['classroom'] ?: 'semua-kelas';
         $fileName = 'rekap-absensi-'.$data['filters']['year'].'-'.str_pad((string) $data['filters']['month'], 2, '0', STR_PAD_LEFT).'-'.$classroom.'.pdf';
@@ -40,7 +48,7 @@ class MonthlyRecapController extends Controller
             ->download($fileName);
     }
 
-    private function recapData(Request $request, SchoolCalendar $calendar): array
+    private function recapData(Request $request, SchoolCalendar $calendar, bool $loadRows = true): array
     {
         $filters = $request->validate([
             'classroom' => ['nullable', Rule::in($this->classrooms())],
@@ -53,6 +61,20 @@ class MonthlyRecapController extends Controller
         $classroom = $filters['classroom'] ?? null;
         $start = Carbon::create($year, $month, 1)->startOfMonth();
         $end = $start->copy()->endOfMonth();
+
+        $baseData = [
+            'classrooms' => $this->classrooms(),
+            'months' => $this->months(),
+            'filters' => compact('classroom', 'month', 'year'),
+            'dates' => collect(),
+            'rows' => collect(),
+            'title' => $this->months()[$month].' '.$year,
+            'hasResult' => $loadRows,
+        ];
+
+        if (! $loadRows) {
+            return $baseData;
+        }
 
         $students = Student::query()
             ->where('is_active', true)
@@ -97,14 +119,15 @@ class MonthlyRecapController extends Controller
             return compact('student', 'days', 'summary');
         });
 
-        return [
-            'classrooms' => $this->classrooms(),
-            'months' => $this->months(),
-            'filters' => compact('classroom', 'month', 'year'),
+        return array_merge($baseData, [
             'dates' => $dates,
             'rows' => $rows,
-            'title' => $this->months()[$month].' '.$year,
-        ];
+        ]);
+    }
+
+    private function hasSubmittedFilter(Request $request): bool
+    {
+        return $request->hasAny(['classroom', 'month', 'year']);
     }
 
     private function classrooms(): array
