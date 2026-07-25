@@ -2,24 +2,24 @@
 
 @section('content')
 <div class="space-y-6">
-    <section class="overflow-hidden rounded-3xl bg-emerald-950 text-white shadow-sm">
-        <div class="grid gap-6 p-6 lg:grid-cols-[1fr_360px] lg:p-8">
+    <section class="overflow-hidden rounded-2xl bg-emerald-950 text-white shadow-sm">
+        <div class="grid gap-4 p-5 lg:grid-cols-[1fr_280px] lg:p-6">
             <div>
-                <p class="text-sm font-semibold uppercase tracking-[.22em] text-emerald-200">Prisma</p>
-                <h2 class="mt-3 text-3xl font-black leading-tight">Dashboard Presensi Murid</h2>
-                <p class="mt-3 max-w-2xl text-sm leading-6 text-emerald-100">
+                <p class="text-xs font-semibold uppercase tracking-[.22em] text-emerald-200">Prisma</p>
+                <h2 class="mt-2 text-2xl font-black leading-tight">Dashboard Presensi Murid</h2>
+                <p class="mt-2 max-w-2xl text-sm leading-5 text-emerald-100">
                     Pantau ringkasan presensi hari ini, status setiap kelas, dan murid yang perlu ditindaklanjuti.
                 </p>
             </div>
-            <div class="rounded-3xl bg-white/10 p-5 ring-1 ring-white/15">
-                <p id="clockDay" class="text-sm font-semibold uppercase tracking-[.18em] text-emerald-200">{{ now()->isoFormat('dddd') }}</p>
-                <p id="clockDate" class="mt-2 text-xl font-bold">{{ now()->isoFormat('D MMMM YYYY') }}</p>
-                <p id="clockTime" class="mt-5 text-5xl font-black tabular-nums">{{ now()->format('H:i:s') }}</p>
+            <div class="rounded-2xl bg-white/10 p-4 ring-1 ring-white/15">
+                <p id="clockDay" class="text-xs font-semibold uppercase tracking-[.18em] text-emerald-200">{{ now()->isoFormat('dddd') }}</p>
+                <p id="clockDate" class="mt-1 text-lg font-bold">{{ now()->isoFormat('D MMMM YYYY') }}</p>
+                <p id="clockTime" class="mt-3 text-4xl font-black tabular-nums">{{ now()->format('H:i:s') }}</p>
             </div>
         </div>
     </section>
 
-    <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-5">
+    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         @foreach([
             ['Total Murid', $metrics['total_students'], 'bg-teal-500', null],
             ['Hadir', $metrics['student_present'], 'bg-emerald-500', null],
@@ -28,19 +28,19 @@
             ['Belum Absen', $metrics['not_checked_in'], 'bg-slate-600', 'not_checked_in'],
         ] as [$label, $value, $color, $detail])
             @if($detail)
-                <a href="{{ route('dashboard.details', $detail) }}" target="_blank" rel="noopener" class="group rounded-3xl border border-white bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                <a href="{{ route('dashboard.details', $detail) }}" target="_blank" rel="noopener" class="group rounded-2xl border border-white bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                     <div class="flex items-center justify-between">
-                        <div class="h-10 w-10 rounded-2xl {{ $color }} shadow-sm"></div>
-                        <span class="grid h-9 w-9 place-items-center rounded-full bg-slate-50 text-lg text-slate-400 transition group-hover:bg-emerald-50 group-hover:text-emerald-800">&rsaquo;</span>
+                        <div class="h-8 w-8 rounded-xl {{ $color }} shadow-sm"></div>
+                        <span class="grid h-8 w-8 place-items-center rounded-full bg-slate-50 text-lg text-slate-400 transition group-hover:bg-emerald-50 group-hover:text-emerald-800">&rsaquo;</span>
                     </div>
-                    <p class="mt-5 text-sm font-semibold text-slate-500">{{ $label }}</p>
-                    <p class="mt-2 text-4xl font-black text-emerald-950">{{ $value }}</p>
+                    <p class="mt-4 text-sm font-semibold text-slate-500">{{ $label }}</p>
+                    <p class="mt-1 text-3xl font-black text-emerald-950">{{ $value }}</p>
                 </a>
             @else
-                <div class="rounded-3xl border border-white bg-white p-5 shadow-sm">
-                    <div class="h-10 w-10 rounded-2xl {{ $color }} shadow-sm"></div>
-                    <p class="mt-5 text-sm font-semibold text-slate-500">{{ $label }}</p>
-                    <p class="mt-2 text-4xl font-black text-emerald-950">{{ $value }}</p>
+                <div class="rounded-2xl border border-white bg-white p-4 shadow-sm">
+                    <div class="h-8 w-8 rounded-xl {{ $color }} shadow-sm"></div>
+                    <p class="mt-4 text-sm font-semibold text-slate-500">{{ $label }}</p>
+                    <p class="mt-1 text-3xl font-black text-emerald-950">{{ $value }}</p>
                 </div>
             @endif
         @endforeach

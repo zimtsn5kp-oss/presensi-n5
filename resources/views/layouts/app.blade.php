@@ -6,13 +6,16 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Prisma</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo-mts.png') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
     <style>
-        [x-cloak]{display:none} .dt-input{border:1px solid #d1d5db;border-radius:.75rem;padding:.45rem .7rem}
+        [x-cloak]{display:none} body{font-family:'Inter',ui-sans-serif,system-ui,sans-serif} .dt-input{border:1px solid #d1d5db;border-radius:.75rem;padding:.45rem .7rem}
         table.dataTable thead th{color:#065f46}
         #appSidebar{width:18rem;transition:width .2s ease,transform .2s ease}
         #appMain{transition:padding-left .2s ease}

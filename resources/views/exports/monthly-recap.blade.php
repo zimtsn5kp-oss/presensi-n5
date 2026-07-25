@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <style>
-        body{font-family:Arial,sans-serif;font-size:11px;color:#111827}
+        body{font-family:Inter,Arial,sans-serif;font-size:11px;color:#111827}
         h2{margin:0 0 6px;font-size:18px}
         p{margin:0 0 12px;color:#475569}
         table{width:100%;border-collapse:collapse}
