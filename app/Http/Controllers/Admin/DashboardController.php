@@ -6,56 +6,65 @@ use App\Http\Controllers\Controller;
 use App\Models\AttendanceLog;
 use App\Models\Student;
 use App\Repositories\Contracts\AttendanceRepository;
+use App\Services\SchoolCalendar;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
 class DashboardController extends Controller
 {
-    public function __invoke(Request $request, AttendanceRepository $attendance)
+    public function __invoke(Request $request, AttendanceRepository $attendance, SchoolCalendar $calendar)
     {
         $filters = $request->validate([
             'classroom' => ['nullable', Rule::in($this->classrooms())],
         ]);
         $classroom = $filters['classroom'] ?? null;
+        $metrics = $attendance->dashboardMetrics();
+        $attendancePercentage = $metrics['total_students'] > 0
+            ? round(($metrics['student_present'] / $metrics['total_students']) * 100, 1)
+            : 0;
 
         return view('dashboard.index', [
-            'metrics' => $attendance->dashboardMetrics(),
+            'metrics' => $metrics,
+            'attendancePercentage' => $attendancePercentage,
             'classrooms' => $this->classrooms(),
             'selectedClassroom' => $classroom,
-            'statusChart' => $this->statusChart($classroom),
+            'statusRows' => $this->statusRows($classroom, $calendar),
         ]);
     }
 
-    private function statusChart(?string $classroom): array
+    private function statusRows(?string $classroom, SchoolCalendar $calendar)
     {
-        $start = now()->startOfMonth();
-        $end = now()->endOfMonth();
-        $studentIds = Student::query()
+        $students = Student::query()
             ->where('is_active', true)
             ->when($classroom, fn ($query) => $query->where('classroom', $classroom))
-            ->pluck('id');
+            ->orderBy('classroom')
+            ->get();
 
         $logs = AttendanceLog::query()
             ->where('attendable_type', Student::class)
-            ->whereIn('attendable_id', $studentIds)
-            ->whereBetween('attendance_date', [$start->toDateString(), $end->toDateString()])
+            ->whereDate('attendance_date', today())
+            ->whereIn('attendable_id', $students->pluck('id'))
             ->get()
-            ->groupBy(fn ($log) => $log->attendance_date->format('Y-m-d'));
+            ->groupBy('attendable_id');
 
-        $dates = collect(range(1, $end->day))->map(fn (int $day) => Carbon::create($end->year, $end->month, $day));
-        $count = fn ($dailyLogs, array $statuses) => $dailyLogs?->whereIn('status', $statuses)->count() ?? 0;
+        return $students
+            ->groupBy('classroom')
+            ->map(function ($classStudents, string $classroom) use ($logs, $calendar) {
+                $classLogs = $classStudents
+                    ->flatMap(fn ($student) => $logs->get($student->id, collect()))
+                    ->values();
+                $checkedCount = $classLogs->pluck('attendable_id')->unique()->count();
 
-        return [
-            'title' => $start->isoFormat('MMMM YYYY'),
-            'labels' => $dates->map(fn ($date) => $date->format('d'))->values(),
-            'series' => [
-                ['name' => 'Kehadiran', 'data' => $dates->map(fn ($date) => $count($logs->get($date->format('Y-m-d')), ['hadir', 'terlambat']))->values()],
-                ['name' => 'Sakit', 'data' => $dates->map(fn ($date) => $count($logs->get($date->format('Y-m-d')), ['sakit']))->values()],
-                ['name' => 'Izin', 'data' => $dates->map(fn ($date) => $count($logs->get($date->format('Y-m-d')), ['izin']))->values()],
-                ['name' => 'Alfa', 'data' => $dates->map(fn ($date) => $count($logs->get($date->format('Y-m-d')), ['alfa']))->values()],
-            ],
-        ];
+                return [
+                    'classroom' => $classroom,
+                    'total' => $classStudents->count(),
+                    'present' => $classLogs->where('status', 'hadir')->count(),
+                    'late' => $classLogs->where('status', 'terlambat')->count(),
+                    'absent' => $classLogs->whereIn('status', ['izin', 'sakit', 'alfa'])->count(),
+                    'not_checked_in' => $calendar->isHoliday(today()) ? 0 : max($classStudents->count() - $checkedCount, 0),
+                ];
+            })
+            ->values();
     }
 
     private function classrooms(): array
