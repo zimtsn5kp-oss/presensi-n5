@@ -21,18 +21,24 @@ class EloquentAttendanceRepository implements AttendanceRepository
         $today = today();
         $activeStudents = Student::where('is_active', true)->count();
         $isHoliday = $this->calendar->isHoliday($today);
+        $todayLogs = AttendanceLog::query()
+            ->where('attendance_date', $today->toDateString())
+            ->where('attendable_type', Student::class);
 
-        $studentPresent = AttendanceLog::whereDate('attendance_date', $today)
-            ->where('attendable_type', Student::class)
-            ->whereIn('status', ['hadir', 'terlambat'])
-            ->count();
+        $statusCounts = (clone $todayLogs)
+            ->select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $studentPresent = (int) $statusCounts->only(['hadir', 'terlambat'])->sum();
+        $checkedIn = (clone $todayLogs)->distinct('attendable_id')->count('attendable_id');
 
         return [
             'total_students' => $activeStudents,
             'student_present' => $studentPresent,
-            'late' => AttendanceLog::whereDate('attendance_date', $today)->where('attendable_type', Student::class)->where('status', 'terlambat')->count(),
-            'absent' => AttendanceLog::whereDate('attendance_date', $today)->where('attendable_type', Student::class)->whereIn('status', ['izin', 'sakit', 'alfa'])->count(),
-            'not_checked_in' => $isHoliday ? 0 : max($activeStudents - AttendanceLog::whereDate('attendance_date', $today)->where('attendable_type', Student::class)->distinct('attendable_id')->count('attendable_id'), 0),
+            'late' => (int) ($statusCounts['terlambat'] ?? 0),
+            'absent' => (int) $statusCounts->only(['izin', 'sakit', 'alfa'])->sum(),
+            'not_checked_in' => $isHoliday ? 0 : max($activeStudents - $checkedIn, 0),
         ];
     }
 
@@ -58,10 +64,16 @@ class EloquentAttendanceRepository implements AttendanceRepository
     public function dailyChart(): array
     {
         $period = collect(CarbonPeriod::create(now()->subDays(6), now()));
+        $rows = AttendanceLog::select(DB::raw('DATE(attendance_date) as day'), DB::raw('count(*) as total'))
+            ->where('attendable_type', Student::class)
+            ->whereIn('status', ['hadir', 'terlambat'])
+            ->whereBetween('attendance_date', [now()->subDays(6)->toDateString(), now()->toDateString()])
+            ->groupBy('day')
+            ->pluck('total', 'day');
 
         return [
             'labels' => $period->map(fn ($date) => $date->isoFormat('DD MMM'))->values(),
-            'series' => $period->map(fn ($date) => AttendanceLog::whereDate('attendance_date', $date)->where('attendable_type', Student::class)->whereIn('status', ['hadir', 'terlambat'])->count())->values(),
+            'series' => $period->map(fn ($date) => (int) ($rows[$date->toDateString()] ?? 0))->values(),
         ];
     }
 

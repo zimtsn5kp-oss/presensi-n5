@@ -4,12 +4,9 @@
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Prisma</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo-mts.png') }}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite('resources/css/app.css')
     <style>
-        body{font-family:'Inter',ui-sans-serif,system-ui,sans-serif}
+        body{font-family:ui-sans-serif,system-ui,sans-serif}
         .login-bg{
             background:
                 linear-gradient(135deg, rgba(4,120,87,.18) 0 25%, transparent 25% 50%, rgba(245,158,11,.10) 50% 75%, transparent 75%) 0 0 / 28px 28px,

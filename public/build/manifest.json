@@ -1,0 +1,40 @@
+{
+  "_dataTables-nh6yBYpf.css": {
+    "file": "assets/dataTables-nh6yBYpf.css",
+    "src": "_dataTables-nh6yBYpf.css"
+  },
+  "_dataTables.dataTables-O4nEzIfV.js": {
+    "file": "assets/dataTables.dataTables-O4nEzIfV.js",
+    "name": "dataTables.dataTables",
+    "css": [
+      "assets/dataTables-nh6yBYpf.css"
+    ]
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-DkHV1UIu.css",
+    "name": "app",
+    "names": [
+      "app.css"
+    ],
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/js/pages/students-index.js": {
+    "file": "assets/students-index-DG9Mf6zm.js",
+    "name": "students-index",
+    "src": "resources/js/pages/students-index.js",
+    "isEntry": true,
+    "imports": [
+      "_dataTables.dataTables-O4nEzIfV.js"
+    ]
+  },
+  "resources/js/pages/teachers-index.js": {
+    "file": "assets/teachers-index-DDLYJ-pr.js",
+    "name": "teachers-index",
+    "src": "resources/js/pages/teachers-index.js",
+    "isEntry": true,
+    "imports": [
+      "_dataTables.dataTables-O4nEzIfV.js"
+    ]
+  }
+}

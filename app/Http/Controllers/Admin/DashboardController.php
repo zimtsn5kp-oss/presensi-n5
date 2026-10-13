@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Repositories\Contracts\AttendanceRepository;
 use App\Services\SchoolCalendar;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class DashboardController extends Controller
@@ -34,34 +35,47 @@ class DashboardController extends Controller
 
     private function statusRows(?string $classroom, SchoolCalendar $calendar)
     {
-        $students = Student::query()
+        $studentTotals = Student::query()
+            ->select('classroom', DB::raw('count(*) as total'))
             ->where('is_active', true)
             ->when($classroom, fn ($query) => $query->where('classroom', $classroom))
-            ->orderBy('classroom')
-            ->get();
-
-        $logs = AttendanceLog::query()
-            ->where('attendable_type', Student::class)
-            ->whereDate('attendance_date', today())
-            ->whereIn('attendable_id', $students->pluck('id'))
-            ->get()
-            ->groupBy('attendable_id');
-
-        return $students
             ->groupBy('classroom')
-            ->map(function ($classStudents, string $classroom) use ($logs, $calendar) {
-                $classLogs = $classStudents
-                    ->flatMap(fn ($student) => $logs->get($student->id, collect()))
-                    ->values();
-                $checkedCount = $classLogs->pluck('attendable_id')->unique()->count();
+            ->orderBy('classroom')
+            ->pluck('total', 'classroom');
+
+        $logsByClassroom = AttendanceLog::query()
+            ->join('students', 'students.id', '=', 'attendance_logs.attendable_id')
+            ->select('students.classroom', 'attendance_logs.status', DB::raw('count(*) as total'))
+            ->where('attendance_logs.attendable_type', Student::class)
+            ->where('attendance_logs.attendance_date', today()->toDateString())
+            ->where('students.is_active', true)
+            ->when($classroom, fn ($query) => $query->where('students.classroom', $classroom))
+            ->groupBy('students.classroom', 'attendance_logs.status')
+            ->get()
+            ->groupBy('classroom');
+
+        $checkedByClassroom = AttendanceLog::query()
+            ->join('students', 'students.id', '=', 'attendance_logs.attendable_id')
+            ->select('students.classroom', DB::raw('count(distinct attendance_logs.attendable_id) as total'))
+            ->where('attendance_logs.attendable_type', Student::class)
+            ->where('attendance_logs.attendance_date', today()->toDateString())
+            ->where('students.is_active', true)
+            ->when($classroom, fn ($query) => $query->where('students.classroom', $classroom))
+            ->groupBy('students.classroom')
+            ->pluck('total', 'classroom');
+
+        return $studentTotals
+            ->map(function (int $total, string $classroom) use ($logsByClassroom, $checkedByClassroom, $calendar) {
+                $statusCounts = $logsByClassroom->get($classroom, collect())->pluck('total', 'status');
+                $checkedCount = (int) ($checkedByClassroom[$classroom] ?? 0);
 
                 return [
                     'classroom' => $classroom,
-                    'total' => $classStudents->count(),
-                    'present' => $classLogs->where('status', 'hadir')->count(),
-                    'late' => $classLogs->where('status', 'terlambat')->count(),
-                    'absent' => $classLogs->whereIn('status', ['izin', 'sakit', 'alfa'])->count(),
-                    'not_checked_in' => $calendar->isHoliday(today()) ? 0 : max($classStudents->count() - $checkedCount, 0),
+                    'total' => $total,
+                    'present' => (int) ($statusCounts['hadir'] ?? 0),
+                    'late' => (int) ($statusCounts['terlambat'] ?? 0),
+                    'absent' => (int) $statusCounts->only(['izin', 'sakit', 'alfa'])->sum(),
+                    'not_checked_in' => $calendar->isHoliday(today()) ? 0 : max($total - $checkedCount, 0),
                 ];
             })
             ->values();

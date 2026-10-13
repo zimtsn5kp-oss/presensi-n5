@@ -1,0 +1,1 @@
+import{t as e}from"./dataTables.dataTables-O4nEzIfV.js";var t=document.getElementById(`teachersTable`);new e(t,{processing:!0,serverSide:!0,ajax:t.dataset.url,columns:[{data:`nip`},{data:`name`},{data:`subject`},{data:`status_badge`,orderable:!1,searchable:!1},{data:`actions`,orderable:!1,searchable:!1}]});

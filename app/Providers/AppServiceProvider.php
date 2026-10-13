@@ -24,7 +24,15 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         View::composer('*', function ($view): void {
-            $view->with('schoolSetting', SchoolSetting::query()->first());
+            static $loaded = false;
+            static $schoolSetting = null;
+
+            if (! $loaded) {
+                $schoolSetting = SchoolSetting::query()->first();
+                $loaded = true;
+            }
+
+            $view->with('schoolSetting', $schoolSetting);
         });
     }
 }
